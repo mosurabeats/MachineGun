@@ -6,8 +6,8 @@ export const EVIDENCE = {
     desc: 'Supported by dermatology, wound-healing or infection-control literature, or by public-health agencies.',
   },
   reg: {
-    label: 'Legal requirement',
-    desc: 'Comes from statute, administrative rule or a regulator. Always check the current text with the regulator.',
+    label: 'Safety standard',
+    desc: 'Infection-control or professional safety practice (OSHA, CDC, manufacturer instructions). Follow it every time.',
   },
   ind: {
     label: 'Industry convention',

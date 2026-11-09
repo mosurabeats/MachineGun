@@ -8,9 +8,9 @@ import { MILESTONES } from '../data/milestones.js';
 import { TRACKS } from '../data/techniques.js';
 import { UNITS } from '../data/deep/technique-units.js';
 import { QUESTIONS, DOMAINS } from '../data/questions.js';
-import { RESOURCES } from '../data/resources.js';
+import { RESOURCES, resourcesFor } from '../data/resources.js';
 import { getState, update, silentUpdate, uid, putFile } from '../lib/store.js';
-import { esc, tag, today, lessonHTML, bindQuizzes, evidenceLegend, thumbs, hydrateThumbs } from '../lib/ui.js';
+import { esc, tag, today, lessonHTML, bindQuizzes, evidenceLegend, thumbs, hydrateThumbs, resourceList } from '../lib/ui.js';
 import { mountWidgets } from '../lib/widgets.js';
 import { notify, ask } from '../lib/dialog.js';
 import { clientWorkGate, exerciseUnlocked, healingDue, milestoneStatus, HEALING_CHECKPOINTS } from '../lib/logic.js';
@@ -62,7 +62,7 @@ const PAGES = {
       <h2>The Station</h2>
       <p class="lede">The practical tattooing education center: machines, needles, skin, procedure, safety, and the supervised transition to human skin.</p>
       <div class="banner">
-        <strong>Online study never authorizes tattooing a person.</strong> Work on human skin happens only under a qualified, licensed supervising mentor, in a registered shop, under an active Vermont apprentice license. LINEAGE and its AI Mentor cannot certify readiness.
+        <strong>Practise on synthetic skin; work on people with your mentor.</strong> Readiness for human skin is your mentor's call, made in person. LINEAGE and its AI Mentor cannot certify it.
       </div>
       <div class="cards">
         <div class="card"><div class="big">${subs}</div>synthetic-skin submissions</div>
@@ -108,7 +108,7 @@ const PAGES = {
   equipment() {
     const items = [
       ['Power supplies, footswitches, clip cords & RCA', 'See the Machine Lab lesson on power. Inspect before every session and barrier-protect what you touch.', 'ind'],
-      ['Grips & tubes', 'Disposable grips are single-use. Reusable steel grips and tubes require cleaning followed by validated sterilisation (autoclave with monitoring) per the Vermont rules and your shop protocol.', 'reg'],
+      ['Grips & tubes', 'Disposable grips are single-use. Reusable steel grips and tubes require cleaning followed by validated sterilisation (autoclave with monitoring) per your shop protocol.', 'reg'],
       ['Cartridges & needles', 'Single-use, opened in front of the client, disposed of as sharps. Check compatibility and expiry.', 'reg'],
       ['Inks', 'Reputable manufacturers only. Record brand and lot. Never dilute with non-sterile water. Use single-use ink caps.', 'med'],
       ['Stencil supplies', 'Thermal or hectograph stencils and stencil solution. Apply from single-use portions.', 'ind'],
@@ -119,7 +119,7 @@ const PAGES = {
     ];
     return `<h2>Equipment Education</h2>${evidenceLegend()}
       <div class="list">${items.map(([h, p, t]) => `<div class="item"><h4>${esc(h)} ${tag(t)}</h4><p>${esc(p)}</p></div>`).join('')}</div>
-      ${refLinks(['osha-bbp', 'vt-rules', 'fda-ink', 'cdc-tattoo'])}`;
+      ${refLinks(['osha-bbp', 'fda-ink', 'cdc-tattoo'])}`;
   },
 
   techniques(arg, topicId) {
@@ -130,6 +130,7 @@ const PAGES = {
     return `<h2>Technique Tracks</h2>
       <nav class="pills">${TRACKS.map((t) => `<a class="${t.id === track.id ? 'active' : ''}" href="#/station/techniques/${t.id}">${esc(t.title)}</a>`).join('')}</nav>
       <p class="small">Each topic has five parts: theory, demonstration study, a simulated exercise on synthetic skin, a professional observation assignment, and a supervised practical assessment signed by your mentor.</p>
+      ${resourcesFor(track.id).length ? `<details class="topic" open><summary>Study with (${resourcesFor(track.id).length})</summary>${resourceList(resourcesFor(track.id))}</details>` : ''}
       <p>Synthetic milestone: <b>${esc(msTitle(track.synthMilestone))}</b> (${statusBadge(st, track.synthMilestone)}) · Human-skin assessment: <b>${esc(msTitle(track.milestone))}</b> (${statusBadge(st, track.milestone)})</p>
       ${track.topics.map((t) => `
         <details class="topic"><summary>${esc(t.title)} <a class="small" href="#/station/techniques/${track.id}/${t.id}">open full unit →</a></summary>
@@ -164,7 +165,7 @@ const PAGES = {
     const st = getState();
     const runs = st.checklistRuns.slice(-5).reverse();
     return `<h2>Complete Tattoo Procedure</h2>
-      <p class="lede">All 18 steps of a professional appointment. Safety-critical steps are marked and link to public-health and Vermont sources. Read the current text of each.</p>
+      <p class="lede">All 18 steps of a professional appointment. Safety-critical steps are marked and link to public-health sources.</p>
       <div class="row"><button id="run-practice">Start a practice run (synthetic skin)</button>
         <span class="muted small">Supervised client runs are logged in <a href="#/station/supervised">Supervised Client Work</a>.</span></div>
       <div id="run-area"></div>
@@ -188,26 +189,24 @@ const PAGES = {
 
   safety() {
     const st = getState();
-    const L = st.legal || {};
     return `<h2>Safety Training</h2>
       ${evidenceLegend()}
       <div class="list">
         <div class="item"><h4>Bloodborne pathogens & universal precautions ${tag('reg')}</h4>
-          <p>Treat all blood and body fluids as potentially infectious. Exposure control plan, PPE, sharps handling (no recapping), regulated waste, and post-exposure procedures follow OSHA 29 CFR 1910.1030. Vermont requires a universal precautions / infectious disease course. Confirm the current required course with OPR.</p>
-          <p>Your recorded course: <b>${L.bbpCompleted ? `${esc(L.bbpProvider || 'course')} completed ${esc(L.bbpCompleted)}${L.bbpExpires ? `, expires ${esc(L.bbpExpires)}` : ''}` : 'not recorded'}</b>. <a href="#/ledger">Record it in The Ledger</a>.</p></div>
+          <p>Treat all blood and body fluids as potentially infectious. Exposure control plan, PPE, sharps handling (no recapping), regulated waste, and post-exposure procedures are laid out in OSHA 29 CFR 1910.1030, which is a good study text. Take a bloodborne-pathogens course early in your apprenticeship. Your mentor signs it off as a milestone.</p></div>
         <div class="item"><h4>Cross-contamination ${tag('med')}</h4><p>Anything touched with a contaminated glove is contaminated. Define the clean field, the dirty field and the transitions between them before every session. See procedure steps 4–6, 14 and 17.</p></div>
         <div class="item"><h4>Ink safety ${tag('med')}</h4><p>The CDC has linked tattoo infection outbreaks to contaminated ink and dilution with non-sterile water. The FDA has issued warnings about specific contaminated inks, including in 2025. Check FDA advisories, record lot numbers, and report reactions to MedWatch.</p></div>
         <div class="item"><h4>Exposure incidents ${tag('reg')}</h4><p>After a needlestick or splash, follow your shop's post-exposure plan: wash, report to your mentor, and seek prompt medical evaluation. Document the incident.</p></div>
         <div class="item"><h4>Client emergencies ${tag('med')}</h4><p>Know where the first-aid kit is and how to call 911. A first-aid or CPR course is strongly recommended.</p></div>
       </div>
-      ${refLinks(['osha-bbp', 'vt-rules', 'vt-statute', 'cdc-tattoo', 'fda-ink'])}`;
+      <h3>Study with</h3>${resourceList(resourcesFor('safety'))}`;
   },
 
   supervised() {
     const st = getState();
     const gate = clientWorkGate(st);
     return `<h2>Supervised Human-Skin Tattooing</h2>
-      <p class="lede">The transition from synthetic surfaces to consenting adult clients, under a qualified mentor and within Vermont law.</p>
+      <p class="lede">The transition from synthetic surfaces to consenting adult clients, under your mentor.</p>
       <div class="gate ${gate.unlocked ? 'ok' : 'locked'}">
         <h3>${gate.unlocked ? 'Supervised session log unlocked' : 'Supervised session log locked'}</h3>
         ${gate.unlocked ? '<p>Your mentor has approved every prerequisite. Every client session still requires your mentor present and directly supervising.</p>'
@@ -215,7 +214,7 @@ const PAGES = {
       </div>
       <h3>Curriculum</h3>
       ${SUPERVISED_MODULES.map((m) => `<details class="topic"><summary>${esc(m.title)} ${tag(m.tag)}</summary>${m.body.map((p) => `<p>${esc(p)}</p>`).join('')}
-        ${m.id === 'sup.legal' ? refLinks(['vt-statute', 'vt-rules', 'vt-supervise', 'vt-opr']) : ''}</details>`).join('')}
+</details>`).join('')}
       ${gate.unlocked ? sessionForm() : ''}
       ${sessionList(st)}`;
   },
@@ -274,8 +273,8 @@ const PAGES = {
 function videoStudy(kind) {
   const prompts = kind === 'machine'
     ? ['Find a manufacturer\'s setup video for a machine your shop uses. Write down the stroke, voltage range and cartridge compatibility it states.', 'Watch an experienced artist tune a coil machine. List each adjustment and its stated effect.', 'Compare two educators\' opinions on pen vs coil for learning. Note where they disagree.']
-    : ['Watch a full procedure video from a licensed artist. Mark every glove change and barrier touch.', 'Identify one cross-contamination risk in a video and describe the fix.'];
-  return `<div class="item"><h4>Video & demonstration study</h4><p class="small">LINEAGE does not host third-party videos. Use the <a href="#/archive/research">research library</a> to find professional sources, then complete these observation prompts:</p>
+    : ['Watch a full procedure video from an experienced artist. Mark every glove change and barrier touch.', 'Identify one cross-contamination risk in a video and describe the fix.'];
+  return `<div class="item"><h4>Video & demonstration study</h4><p class="small">LINEAGE does not host third-party videos. Use the <a href="#/archive/research">learning resources</a> to find professional sources, then complete these observation prompts:</p>
     <ul>${prompts.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>`;
 }
 
@@ -289,7 +288,7 @@ function unitPage(track, topicId) {
     <h2>${esc(t.title)}</h2>
     <p class="lede">${esc(t.theory)}</p>
     <section class="panel"><h3>1. Theory</h3>${(u.lessons || []).map((p) => `<p>${esc(p)}</p>`).join('')}</section>
-    <section class="panel"><h3>2. Demonstration study</h3><p>${esc(t.demo)}</p><p class="small muted">Find professional demonstrations through the <a href="#/archive/research">research library</a>, and record what you watched with the <b>Log observation</b> button in section 4.</p></section>
+    <section class="panel"><h3>2. Demonstration study</h3><p>${esc(t.demo)}</p>${resourcesFor(topicId).length || resourcesFor(track.id).length ? resourceList([...new Set([...resourcesFor(topicId), ...resourcesFor(track.id)])]) : ''}<p class="small muted">More in the <a href="#/archive/research">learning resources</a>. Record what you watched with the <b>Log observation</b> button in section 4.</p></section>
     <section class="panel"><h3>3. Drill progression (synthetic skin)</h3>
       ${u.progression?.length ? `<table class="tbl"><thead><tr><th>Session</th><th>Drill</th><th>Target</th><th>Done</th></tr></thead><tbody>${u.progression.map((p) => `<tr><td>${p.s}</td><td>${esc(p.drill)}</td><td>${esc(p.target)}</td><td><input type="checkbox" data-unit="${esc(topicId)}" data-step="${p.s}" ${done[p.s] ? 'checked' : ''}></td></tr>`).join('')}</tbody></table>` : ''}
       ${ex ? `<p>Linked assignment: <a href="#/station/practice/${esc(ex.id)}">${esc(ex.title)}</a>. Submit photos there for AI feedback.</p>` : ''}
@@ -361,7 +360,7 @@ export function aiSummary(r) {
 function sessionForm() {
   return `<form id="session-form" class="form">
     <h3>Log a supervised client session</h3>
-    <p class="small">Your learning record only. The shop keeps the legal client record. Do not enter client names or contact details.</p>
+    <p class="small">Your learning record. Use client initials or a shop reference, not names or contact details.</p>
     <label>Date <input type="date" name="date" value="${today()}" required></label>
     <label>Client reference (initials or shop record #) <input name="clientRef" required></label>
     <label><input type="checkbox" name="adult" required> Age 18+ verified with government photo ID</label>

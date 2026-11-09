@@ -12,7 +12,7 @@ import { PROCEDURE } from '../public/data/procedure.js';
 import { MACHINE_LESSONS } from '../public/data/machines.js';
 import { NEEDLE_LESSONS } from '../public/data/needles.js';
 import { SKIN_LESSONS } from '../public/data/skin.js';
-import { RESOURCES } from '../public/data/resources.js';
+import { RESOURCES, RESOURCE_KINDS } from '../public/data/resources.js';
 import { SECTIONS } from '../public/data/curriculum.js';
 import { validateMentorRequest } from '../server/index.js';
 import { finalize, OUTPUT_SCHEMA, buildMessages } from '../server/mentor.js';
@@ -21,7 +21,6 @@ const MENTOR = { id: 'm1', name: 'Pat Doe', credential: 'VT-123', passHash: { sa
 const sign = (milestoneId, decision = 'approved', extra = {}) => ({ milestoneId, decision, source: 'mentor', verified: true, mentorId: 'm1', mentorName: 'Pat Doe', mentorCredential: 'VT-123', date: '2026-01-01', ...extra });
 const readyState = () => ({
   mentor: MENTOR,
-  legal: { apprenticeLicense: 'APP-1', confirmedByMentor: 'm1', bbpCompleted: '2026-01-01', bbpExpires: '2099-01-01', licenseExpires: '2099-01-01' },
   signoffs: CLIENT_WORK_PREREQUISITES.map((id) => sign(id)),
 });
 
@@ -71,10 +70,6 @@ test('client work gate: each missing requirement re-locks', () => {
     assert.equal(clientWorkGate(s).unlocked, false, id);
   }
   let s = readyState(); s.mentor = null; assert.equal(clientWorkGate(s).unlocked, false);
-  s = readyState(); s.legal.apprenticeLicense = ''; assert.equal(clientWorkGate(s).unlocked, false);
-  s = readyState(); delete s.legal.confirmedByMentor; assert.equal(clientWorkGate(s).unlocked, false);
-  s = readyState(); s.legal.bbpExpires = '2000-01-01'; assert.equal(clientWorkGate(s).unlocked, false);
-  s = readyState(); s.legal.licenseExpires = '2000-01-01'; assert.equal(clientWorkGate(s).unlocked, false);
   s = readyState(); s.signoffs.push(sign('ms.readiness-client', 'needs-work', { date: '2026-03-01' })); assert.equal(clientWorkGate(s).unlocked, false);
 });
 
@@ -246,4 +241,31 @@ test('workshop and archive have real content', async () => {
   const ids = WORKSHOP.flatMap((u) => u.exercises.map((e) => e.id));
   assert.equal(new Set(ids).size, ids.length);
   for (const u of WORKSHOP) assert.ok(u.lessons.length && u.critique.length);
+});
+
+test('no licensing or legal content remains in the curriculum', async () => {
+  const { readFile, readdir } = await import('node:fs/promises');
+  const dirs = ['public/data', 'public/data/deep', 'public/views', 'public/lib'];
+  for (const d of dirs) for (const f of await readdir(d)) {
+    if (!f.endsWith('.js')) continue;
+    const text = await readFile(`${d}/${f}`, 'utf8');
+    assert.doesNotMatch(text, /Vermont|\bOPR\b|apprentice license|licensure/i, `${d}/${f}`);
+  }
+});
+
+test('learning resources are well-formed and linked to real units', async () => {
+  const { WORKSHOP } = await import('../public/data/workshop.js');
+  const { ARCHIVE } = await import('../public/data/archive.js');
+  const { UNITS } = await import('../public/data/deep/technique-units.js');
+  const known = new Set(['safety', 'observe',
+    ...WORKSHOP.map((u) => u.id), ...ARCHIVE.map((a) => a.id), ...TRACKS.map((t) => t.id), ...Object.keys(UNITS),
+    ...[...MACHINE_LESSONS, ...NEEDLE_LESSONS, ...SKIN_LESSONS].map((l) => l.id)]);
+  const kinds = new Set(RESOURCE_KINDS.map(([k]) => k));
+  assert.equal(new Set(RESOURCES.map((r) => r.id)).size, RESOURCES.length);
+  for (const r of RESOURCES) {
+    assert.ok(kinds.has(r.kind), r.id);
+    assert.ok(['checked', 'known', 'lead'].includes(r.status), r.id);
+    for (const u of r.for || []) assert.ok(known.has(u), `${r.id} -> ${u}`);
+  }
+  for (const [k] of RESOURCE_KINDS) assert.ok(RESOURCES.some((r) => r.kind === k), k);
 });

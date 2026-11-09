@@ -6,7 +6,7 @@
 export const MILESTONES = [
   // Synthetic / pre-client
   { id: 'ms.bbp-training', phase: 'pre-client', gate: true, title: 'Bloodborne pathogens / universal precautions training verified',
-    observe: 'Mentor has seen the certificate and confirmed the course meets the current Vermont OPR requirement.' },
+    observe: 'Mentor has seen the course certificate and checked that you can explain universal precautions, exposure response and sharps handling.' },
   { id: 'ms.cross-contamination', phase: 'pre-client', gate: true, title: 'Barrier & cross-contamination practice observed',
     observe: 'Mentor watched the apprentice set up, work, take a break and break down without cross-contaminating.' },
   { id: 'ms.procedure-synthetic', phase: 'pre-client', gate: true, title: 'Full procedure performed on synthetic skin, observed in person',
@@ -20,7 +20,7 @@ export const MILESTONES = [
   { id: 'ms.consult', phase: 'pre-client', title: 'Consultation & consent process role-played',
     observe: 'Apprentice ran a consultation, ID check, screening and consent with the mentor or a colleague.' },
   { id: 'ms.readiness-client', phase: 'pre-client', gate: true, title: 'Mentor decision: ready to begin supervised client work',
-    observe: 'Mentor\'s professional judgement, made in person, that the apprentice may begin supervised client work on appropriate beginner projects, within the law.' },
+    observe: 'Mentor\'s professional judgement, made in person, that the apprentice may begin supervised client work on appropriate beginner projects.' },
 
   // Supervised client work
   { id: 'ms.client-first', phase: 'supervised', title: 'First supervised client tattoo completed',
@@ -34,7 +34,6 @@ export const MILESTONES = [
   { id: 'ms.healing-eval', phase: 'supervised', title: 'Healed-work self-evaluation matches mentor\'s', observe: 'Apprentice\'s written critique of healed work agrees with the mentor\'s assessment.' },
 
   // Toward independence
-  { id: 'ms.hours', phase: 'independence', title: 'Required apprenticeship hours completed under active license', observe: 'Hours verified against the Vermont OPR supervising statement requirement in force.' },
   { id: 'ms.portfolio', phase: 'independence', title: 'Professional portfolio reviewed', observe: 'Includes designs, flash, healed tattoos and progress documentation.' },
-  { id: 'ms.independent', phase: 'independence', title: 'Mentor recommends pursuing independent licensure', observe: 'Mentor\'s judgement only. Licensure is granted by the regulator, not by LINEAGE or the mentor.' },
+  { id: 'ms.independent', phase: 'independence', title: 'Mentor judges you ready to work independently', observe: 'Mentor\'s judgement after reviewing your healed work across styles and body areas.' },
 ];

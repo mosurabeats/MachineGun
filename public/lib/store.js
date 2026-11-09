@@ -16,7 +16,6 @@ const EMPTY = () => ({
   submissions: [],     // synthetic practice: { id, exerciseId, date, notes, surface, setup, fileIds }
   checklistRuns: [],   // { id, mode, date, checked: {stepId: [bool]} }
   mentor: null,        // { id, name, credential, shop, passHash: {salt, hash}, registered }
-  legal: {},           // { apprenticeLicense, licenseExpires, shopRegistration, bbpCompleted, bbpExpires, bbpProvider, confirmedByMentor, confirmedDate }
   signoffs: [],        // mentor milestone sign-offs
   mentorNotes: [],     // mentor observations not tied to a milestone
   hours: [],           // { id, date, hours, activity, countersign }

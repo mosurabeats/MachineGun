@@ -1,6 +1,6 @@
 // Question bank. Format per entry: [question, options, answerIndex, explanation].
 // Grouped by domain. 'scenario' questions are judgement questions; the
-// "correct" answer reflects safe professional practice and Vermont law.
+// "correct" answer reflects safe professional practice.
 
 const Q = (domain, list) => list.map(([q, options, answer, explain], i) => ({ id: `${domain}.${i + 1}`, domain, q, options, answer, explain }));
 
@@ -10,7 +10,6 @@ export const DOMAINS = {
   skin: 'Skin & healing',
   safety: 'Safety & infection control',
   procedure: 'Procedure',
-  law: 'Vermont law & professional practice',
   technique: 'Technique',
   design: 'Design & composition',
   history: 'History',
@@ -104,7 +103,7 @@ export const QUESTIONS = [
   ]),
   ...Q('procedure', [
     ['How many steps are in LINEAGE\'s full appointment sequence?', ['8', '12', '18', '25'], 2, 'From consultation to follow-up.'],
-    ['Age is verified with…', ['A verbal answer', 'Government photo ID', 'Social media', 'The client\'s friend'], 1, 'Vermont prohibits tattooing minors.'],
+    ['Age is verified with…', ['A verbal answer', 'Government photo ID', 'Social media', 'The client\'s friend'], 1, 'Only tattoo adults, and check every time.'],
     ['The stencil placement must be…', ['Decided by the artist alone', 'Checked and approved by the client in a mirror', 'Done after lining', 'Freehand only'], 1, 'Never start on an unapproved placement.'],
     ['Spelling in a design is confirmed…', ['After tattooing', 'In writing before the stencil', 'Never', 'By the AI'], 1, 'Written approval.'],
     ['An intoxicated client should…', ['Be tattooed quickly', 'Not be tattooed', 'Get a discount', 'Sign twice'], 1, 'Impaired people cannot consent properly.'],
@@ -119,22 +118,6 @@ export const QUESTIONS = [
     ['Skin is inspected before tattooing for…', ['Rash, infection, sunburn, broken skin, lesions', 'Hair colour', 'Tan lines only', 'Nothing'], 0, 'Do not tattoo over those; refer.'],
     ['Shaving the area uses…', ['A shared razor', 'A single-use razor', 'No shaving ever', 'Scissors from the drawer'], 1, 'Single-use.'],
     ['Consent can be withdrawn…', ['Never once signed', 'At any time', 'Only before lining', 'Only by email'], 1, 'Stop immediately.'],
-  ]),
-  ...Q('law', [
-    ['In Vermont, tattooists are licensed by…', ['The FDA', 'The Office of Professional Regulation (OPR)', 'The county', 'Nobody'], 1, '26 V.S.A. ch. 79.'],
-    ['Vermont apprentices must hold an apprentice license…', ['After finishing', 'Before the apprenticeship begins', 'Only for color work', 'Never'], 1, 'Hours do not count otherwise.'],
-    ['OPR\'s supervising statement lists how many hours for a tattooist?', ['100', '500', '1,000', '5,000'], 2, 'Verify against the current form.'],
-    ['Apprentice hours count only while…', ['You are at a convention', 'The apprentice license is active', 'You are paid', 'The AI approves'], 1, 'Per the OPR form.'],
-    ['An apprentice supervisor must have practised for at least…', ['1 year', '3 years', '10 years', 'No minimum'], 1, 'Per the Vermont rules, with no disciplinary record.'],
-    ['Tattoo shops in Vermont must…', ['Register with OPR', 'Only have a website', 'Be in a mall', 'Nothing'], 0, 'Shop registration is required.'],
-    ['Can completing LINEAGE lessons authorise you to tattoo people?', ['Yes', 'No', 'Only friends', 'With AI approval'], 1, 'Never.'],
-    ['Who decides you are ready for supervised client work?', ['The AI Mentor', 'Your licensed supervising mentor, in person, within the law', 'You', 'The client'], 1, 'A professional judgement.'],
-    ['Who grants independent licensure?', ['Your mentor', 'LINEAGE', 'The regulator (OPR)', 'A convention'], 2, 'Not LINEAGE or the mentor.'],
-    ['Tattooing a minor in Vermont is…', ['Allowed with a parent', 'Prohibited', 'Allowed over 16', 'Unregulated'], 1, 'Verify in the current statute.'],
-    ['The required universal precautions course should be confirmed with…', ['A forum', 'OPR', 'The ink supplier', 'Social media'], 1, 'Requirements change.'],
-    ['Client records in LINEAGE…', ['Replace the shop\'s legal records', 'Are a learning log only. The shop keeps the legal records.', 'Are sent to OPR', 'Need full client names'], 1, 'Store minimal data.'],
-    ['Tattooing friends at home before licensure is…', ['Good practice', 'Unlawful and unsafe ("scratching")', 'Fine with gloves', 'Encouraged online'], 1, 'Only licensed, supervised work in a registered shop.'],
-    ['Online-only courses marketed as apprenticeships…', ['Satisfy Vermont requirements', 'Do not replace in-person supervised apprenticeship', 'Are required', 'Grant a license'], 1, 'Study supplement only.'],
   ]),
   ...Q('technique', [
     ['To avoid a blob at the start of a line…', ['Touch down then move', 'Be moving before contact', 'Press harder', 'Use a bigger needle'], 1, 'Land and go.'],
@@ -185,15 +168,15 @@ export const QUESTIONS = [
     ['Swallows, anchors and ships came into Western tattooing mainly through…', ['Monasteries', 'Sailors and port towns', 'Royal courts', 'Universities'], 1, 'Maritime tradition.'],
   ]),
   ...Q('scenario', [
-    ['A friend asks you to tattoo them at home "just a small one" before you\'re licensed. You…', ['Do it with gloves', 'Decline: it is unlawful and unsafe, and practice happens on synthetic skin', 'Do it for free', 'Ask the AI'], 1, 'Only licensed, supervised work in a registered shop.'],
-    ['Your AI feedback says your synthetic lines look consistent. Does that mean you\'re ready for clients?', ['Yes', 'No. Readiness is decided in person by your licensed mentor.', 'If three reviews agree', 'If the client agrees'], 1, 'The AI cannot certify.'],
+    ['A friend asks you to tattoo them at home, "just a small one", before your mentor says you\'re ready. You…', ['Do it with gloves', 'Decline: practice happens on synthetic skin, and work on people happens in the shop with your mentor', 'Do it for free', 'Ask the AI'], 1, 'Home tattooing without supervision and a proper station risks infection and bad work.'],
+    ['Who decides you are ready for supervised client work?', ['The AI Mentor', 'Your mentor, in person', 'You', 'The client'], 1, 'It is a professional judgement made from watching your work.'],
+    ['Your AI feedback says your synthetic lines look consistent. Does that mean you\'re ready for clients?', ['Yes', 'No. Readiness is decided in person by your mentor.', 'If three reviews agree', 'If the client agrees'], 1, 'The AI cannot certify.'],
     ['Mid-session the client looks pale and sweaty. First you…', ['Finish the line', 'Stop, lift the machine away and attend to the client', 'Give them caffeine and continue', 'Turn up the music'], 1, 'Possible faint.'],
-    ['A client\'s ID says 17. They have a signed parental note. You…', ['Proceed', 'Decline. Vermont prohibits tattooing minors.', 'Do a small one', 'Ask your mentor to do it'], 1, 'No exceptions.'],
+    ['A client\'s ID says 17. They have a signed parental note. You…', ['Proceed', 'Decline and tell your mentor', 'Do a small one', 'Tattoo them somewhere hidden'], 1, 'Only tattoo adults.'],
     ['Day 4: the client messages a photo of spreading redness and says they feel feverish. You…', ['Recommend more ointment', 'Advise prompt medical care, inform your mentor and document it', 'Tell them it\'s normal', 'Offer a touch-up'], 1, 'Possible infection.'],
     ['You notice ink in the grip area after a session. You…', ['Wipe it and continue', 'Treat the machine as contaminated and follow decontamination steps', 'Ignore it', 'Use a darker barrier'], 1, 'Backflow risk.'],
     ['The client wants script 1 cm tall with tight spacing. You…', ['Do it as asked', 'Explain it will blur, and offer a larger size or simpler design', 'Refuse rudely', 'Do it with a single needle and hope'], 1, 'Readability over time.'],
     ['Your mentor says to stop working an area that looks swollen and shiny. You…', ['Do one more pass', 'Stop working that area', 'Switch to a bigger needle', 'Argue'], 1, 'Signs of overworking.'],
-    ['Your apprentice license lapsed last month, but you kept logging hours. Those hours…', ['Count', 'Do not count under the OPR requirement', 'Count double', 'Count if the mentor signs'], 1, 'Active license required.'],
     ['A client asks you to cover a raised, changing mole with a tattoo. You…', ['Cover it', 'Decline to tattoo over it and suggest a dermatologist', 'Tattoo around it tightly', 'Ask the AI to check it'], 1, 'Lesions need medical evaluation.'],
     ['You drop a sealed cartridge on the floor. You…', ['Use it, since it\'s sealed', 'Follow shop protocol. Typically discard if packaging integrity is in doubt.', 'Rinse it', 'Blow on it'], 1, 'When in doubt, discard.'],
     ['A client reveals they take blood thinners. You…', ['Ignore it', 'Discuss with your mentor and recommend the client consult their prescriber before proceeding', 'Tattoo faster', 'Use less ink'], 1, 'Bleeding risk; refer the medical question.'],

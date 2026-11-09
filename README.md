@@ -2,7 +2,7 @@
 
 A tattoo apprenticeship and professional tattoo education platform. It covers the artistic and the technical sides of becoming a professional tattoo artist: machines, needles, skin, procedure, safety, and the supervised move from synthetic practice surfaces to consenting adult clients.
 
-> **LINEAGE never authorizes anyone to tattoo a person.** Finishing lessons or getting AI feedback is not permission to tattoo. In Vermont, tattooing requires licensure through the Office of Professional Regulation (OPR). Apprentices work under an active apprentice license, supervised by a licensed tattooist, in a registered shop.
+> Practise on synthetic skin; work on people with your mentor. Finishing lessons or getting AI feedback never means you're ready for human skin. Only your mentor decides that, in person.
 
 ## Run it
 
@@ -25,9 +25,9 @@ Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. 
 | **The Path** | Curriculum balance (default 30/25/20/15/10, adjustable, and marked when the mentor set it), weekly hour plan, next steps, the 10 success criteria |
 | **The Workshop** | 9 drawing and design units (line, silhouette, form and value, traditional motifs, color, lettering, designing to be tattooed, flash sheets, stencils), each with lessons, tracked exercises and critique criteria |
 | **The Station** | The practical tattooing education center (below) |
-| **The Archive** | 6 history and composition chapters (ancient and world traditions, Japanese, Western and the electric machine, American traditional, modern regulation, composition on the body), the research library, and where educators disagree |
+| **The Archive** | 6 history and composition chapters, a learning-resources library (courses, video channels, drawing and lettering books, flash collections, machine courses, skin and hygiene references) marked by how well each was verified, and where educators disagree. Relevant resources also appear beside each lesson and unit. |
 | **The Mentor** | AI technical mentor: feedback on visible results, never certification |
-| **The Ledger** | Mentor Mode, legal status, apprenticeship hours, milestones, knowledge checks, backup |
+| **The Ledger** | Mentor Mode, practice hours, milestones, knowledge checks, backup |
 | **The Portfolio** | Designs, practice pieces, fresh and healed supervised work |
 
 ### The Station
@@ -38,23 +38,23 @@ Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. 
 * **Equipment**, **Safety Training** (BBP, cross-contamination, ink safety, exposure incidents, emergencies) and **Troubleshooting** (symptom → causes → checks, with stop items).
 * **Technique Tracks**: Lining, Black and Gray, Color, Traditional Application. 28 full units, each with theory, demonstration study, a session-by-session drill progression with check-offs, "good enough to move on" criteria for synthetic skin, a defect guide (what it looks like, cause, fix), an observation assignment and a mentor-signed assessment.
 * **Chapter-depth lessons**: every machine, needle and skin lesson has extended sections, worked examples, a common-mistakes table and drills. Eight labelled diagrams: coil anatomy, rotary mechanism, needle geometry, skin thickness by body site, three-point stretch, machine angle, clean vs contaminated field, and healing phases.
-* **Question Bank**: 166 questions across 10 domains (machines, needles, skin, safety, procedure, Vermont law, technique, design, history, scenarios). Sets of 10 draw missed questions more often, and mastery is tracked per domain.
+* **Question Bank**: 152 questions across 9 domains (machines, needles, skin, safety, procedure, technique, design, history, scenarios). Sets of 10 draw missed questions more often, and mastery is tracked per domain.
 * **Synthetic-Skin Assignments**: 15 progressive exercises in 4 levels. Each needs photo or video evidence and states visible criteria. Assignments unlock as you submit work, which tracks progress only and says nothing about competency.
 * **Procedure Checklists**: all 18 steps of an appointment, with safety-critical steps marked and referenced, practice runs, and case studies.
-* **Supervised Client Work**: 12 modules covering readiness, Vermont law, eligibility and consent, mentor supervision, beginner projects, facility standards, comfort, complications, documentation, healing, feedback and assessment. Also the **supervised session log**, which stays locked until the gate below is met.
+* **Supervised Client Work**: 11 modules covering readiness, client suitability and consent, working under a mentor, beginner projects, working in a professional station, comfort, complications, documentation, healing, feedback and assessment. Also the **supervised session log**, which stays locked until the gate below is met.
 * **Healed Reviews**: checkpoints at day 3, week 2, weeks 4–6 and month 3, with photos, notes and mentor feedback.
 * **Practical Milestones**: 18 milestones that only the mentor can sign.
 
 ## Safety design
 
-* **Only a human mentor signs.** Milestones, legal-status confirmation, hour countersignatures and feedback on sessions and healing can only be recorded in *Mentor Mode*. The mentor registers with their own passphrase (PBKDF2-hashed), name, credential and shop, and attests that they meet Vermont's supervisor requirements. Each sign-off also requires the mentor to confirm they observed the work in person.
+* **Only a human mentor signs.** Milestones, hour countersignatures and feedback on sessions and healing can only be recorded in *Mentor Mode*. The mentor registers with their own passphrase (PBKDF2-hashed), name and shop. Each sign-off also requires the mentor to confirm they observed the work in person.
 * **The AI cannot unlock anything.** AI output is stored with `source: 'ai'`, and `isValidSignoff` rejects it. The server only returns text. Tests cover this.
-* **Client-work gate** (`clientWorkGate` in `public/lib/logic.js`). Requires a registered mentor, an apprentice license confirmed by that mentor and not expired, current BBP training, and mentor approval of six ★ milestones. The last of those is the mentor's own readiness decision. Replacing the mentor voids the previous mentor's sign-offs.
+* **Client-work gate** (`clientWorkGate` in `public/lib/logic.js`). Requires a registered mentor and their approval of six ★ milestones. The last of those is the mentor's own readiness decision. Replacing the mentor voids the previous mentor's sign-offs.
 * **AI Mentor guardrails** (`server/mentor.js`). A structured output schema splits *visible observations* from *cannot determine* (conclusions that need in-person supervision), *recommended training* (exercise ids only) and *flags for professional evaluation*. The system prompt forbids inferring depth, trauma or competency from photos, diagnosing, certifying, and giving universal settings. The server appends a limitation notice for synthetic-skin, video, supervised and healed uploads whatever the model returns.
 * **Evidence tags.** Every lesson section is tagged *Established science*, *Legal requirement*, *Industry convention* or *Anecdotal/contested*.
-* **Minimal client data.** The session log asks for initials or a shop record number only, and says it does not replace the shop's legal records.
+* **Minimal client data.** The session log asks for initials or a shop record number only.
 
-**Limits:** LINEAGE runs in the browser, so a determined user can edit their own stored data. Mentor Mode stops casual self-signing on a shared device. It is not tamper-proof and is not legal identity verification. OPR's forms and the shop's records remain the authoritative documents.
+**Limits:** LINEAGE runs in the browser, so a determined user can edit their own stored data. Mentor Mode stops casual self-signing on a shared device. It is not tamper-proof and is not identity verification.
 
 ## What it does not do yet
 

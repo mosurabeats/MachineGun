@@ -101,38 +101,31 @@ export const CLIENT_WORK_PREREQUISITES = Object.freeze([
 
 /**
  * Whether supervised client sessions may be logged.
- * Requires: a registered mentor, the apprentice's own legal-status record
- * confirmed by that mentor, unexpired BBP training, and every prerequisite
- * milestone approved by the mentor. Returns reasons for anything missing so the
- * UI can explain exactly what remains.
+ * Requires a registered mentor and every prerequisite milestone approved by
+ * that mentor. Returns reasons for anything missing so the UI can explain
+ * exactly what remains. Nothing the AI Mentor produces can satisfy it.
  */
-export function clientWorkGate(state, today = new Date()) {
+export function clientWorkGate(state) {
   const reasons = [];
   const mentor = state?.mentor;
   if (!mentor || !mentor.name || !mentor.passHash) {
     reasons.push('No supervising mentor is registered in Mentor Mode.');
   }
-  const legal = state?.legal || {};
-  if (!legal.apprenticeLicense || !legal.apprenticeLicense.trim()) {
-    reasons.push('No apprentice license / registration number is recorded.');
-  }
-  if (!legal.confirmedByMentor || (mentor && legal.confirmedByMentor !== mentor.id)) {
-    reasons.push('Your mentor has not confirmed your apprentice license status and the shop registration.');
-  }
-  if (legal.licenseExpires && new Date(legal.licenseExpires) < startOfDay(today)) {
-    reasons.push('The recorded apprentice license has expired.');
-  }
-  if (!legal.bbpCompleted) {
-    reasons.push('No bloodborne-pathogen / universal-precautions course completion date is recorded.');
-  } else if (legal.bbpExpires && new Date(legal.bbpExpires) < startOfDay(today)) {
-    reasons.push('Bloodborne-pathogen training has expired; renew before client work.');
-  }
   for (const id of CLIENT_WORK_PREREQUISITES) {
     const st = milestoneStatus(state?.signoffs, id, mentor?.id ?? null);
-    if (st !== 'approved') reasons.push(`Mentor approval pending: ${id}`);
+    if (st !== 'approved') reasons.push(`Mentor approval pending: ${MILESTONE_LABELS[id] || id}`);
   }
   return { unlocked: reasons.length === 0, reasons };
 }
+
+const MILESTONE_LABELS = {
+  'ms.bbp-training': 'bloodborne pathogens training',
+  'ms.procedure-synthetic': 'full procedure on synthetic skin',
+  'ms.lining-synthetic': 'lining on synthetic skin',
+  'ms.shading-synthetic': 'shading and packing on synthetic skin',
+  'ms.cross-contamination': 'barrier and cross-contamination practice',
+  'ms.readiness-client': 'readiness for supervised client work',
+};
 
 function startOfDay(d) {
   const x = new Date(d);
@@ -141,12 +134,10 @@ function startOfDay(d) {
 }
 
 // ---------------------------------------------------------------------------
-// Apprenticeship hours (Vermont OPR supervising statement lists 1,000 hours for
-// a tattooist; hours only count under an ACTIVE apprentice license). The app
-// tracks hours; the legal record is whatever OPR requires.
+// Practice hours log, optionally countersigned by the mentor.
 // ---------------------------------------------------------------------------
 
-export function hoursSummary(entries, target = 1000, mentorId) {
+export function hoursSummary(entries, target = 0, mentorId) {
   let logged = 0;
   let countersigned = 0;
   for (const e of entries || []) {

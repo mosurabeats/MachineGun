@@ -1,6 +1,6 @@
 // The complete professional tattoo appointment, 18 steps. `critical` marks
 // infection-control or client-safety steps. References point to the Resource
-// Library ids in resources.js. Always check the current text of regulations.
+// Library ids in resources.js.
 
 export const PROCEDURE = [
   { n: 1, id: 'consult', title: 'Client consultation', items: [
@@ -15,17 +15,17 @@ export const PROCEDURE = [
     'Record the client\'s approval.',
   ], refs: [] },
   { n: 3, id: 'consent', title: 'Health screening and informed consent', critical: true, items: [
-    'Verify age with government photo ID. Vermont prohibits tattooing anyone under 18.',
+    'Verify the client is an adult with government photo ID.',
     'Complete the shop\'s health questionnaire: allergies, skin conditions, keloids, bleeding disorders, anticoagulant medication, pregnancy, conditions affecting healing, and any recent alcohol or drug use.',
     'Do not tattoo anyone who appears intoxicated or impaired.',
-    'Explain the risks and the aftercare. Obtain written informed consent, as the rules require.',
+    'Explain the risks and the aftercare. Obtain written informed consent, as your shop requires.',
     'Refer medical questions to a health-care provider. Do not give medical advice.',
-  ], refs: ['vt-rules', 'vt-statute'] },
+  ], refs: [] },
   { n: 4, id: 'station', title: 'Workstation preparation', critical: true, items: [
     'Clean and disinfect all work surfaces with an EPA-registered disinfectant, following the label\'s contact time.',
     'Keep the clean field separate from contaminated areas.',
     'Have a sharps container and biohazard waste within reach.',
-  ], refs: ['osha-bbp', 'vt-rules'] },
+  ], refs: ['osha-bbp', ] },
   { n: 5, id: 'barrier', title: 'Equipment inspection and barrier protection', critical: true, items: [
     'Inspect the machine, cords and power supply.',
     'Barrier-bag the machine, cord and bottles, and cover everything you will touch.',
@@ -41,7 +41,7 @@ export const PROCEDURE = [
     'Inspect the area for rash, infection, sunburn, broken skin, moles or lesions. Do not tattoo over them; refer.',
     'Clean the area. If shaving, use a single-use razor.',
     'Apply antiseptic as your shop protocol directs.',
-  ], refs: ['vt-rules'] },
+  ], refs: [] },
   { n: 8, id: 'stencil', title: 'Stencil placement and approval', items: [
     'Apply the stencil with the client in a natural posture.',
     'Have the client check it in a mirror and approve the placement.',
@@ -85,20 +85,20 @@ export const PROCEDURE = [
   ], refs: [] },
   { n: 16, id: 'aftercare', title: 'Appropriate dressing and aftercare', critical: true, items: [
     'Apply a dressing according to your shop protocol.',
-    'Give written aftercare instructions, as the rules require, and explain them verbally.',
+    'Give written aftercare instructions, as your shop requires, and explain them verbally.',
     'Tell the client the signs of infection or reaction and to seek medical care if they occur.',
-  ], refs: ['vt-rules', 'fda-ink'] },
+  ], refs: ['fda-ink'] },
   { n: 17, id: 'breakdown', title: 'Workstation breakdown and waste disposal', critical: true, items: [
     'Put sharps in the sharps container without recapping.',
     'Put contaminated waste in a biohazard container, as required.',
     'Remove barriers, then clean and disinfect all surfaces.',
     'Remove gloves last, then wash hands.',
-  ], refs: ['osha-bbp', 'vt-rules'] },
+  ], refs: ['osha-bbp', ] },
   { n: 18, id: 'docs', title: 'Documentation and follow-up', critical: true, items: [
-    'Keep the client record and consent form as the rules require, including ink brands and lot numbers.',
+    'Keep the client record and consent form as your shop requires, including ink brands and lot numbers.',
     'Log the session (for an apprentice, in the supervised session log).',
     'Schedule healing check-ins. Record any adverse reaction, and report ink reactions to FDA MedWatch.',
-  ], refs: ['vt-rules', 'fda-ink'] },
+  ], refs: ['fda-ink'] },
 ];
 
 export const CASE_STUDIES = [

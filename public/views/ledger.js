@@ -16,63 +16,44 @@ export const mentorUnlocked = () => Date.now() < mentorUnlockedUntil;
 
 export function renderLedger(root) {
   const st = getState();
-  const L = st.legal || {};
   const mid = st.mentor?.id ?? null;
-  const hrs = hoursSummary(st.hours, 1000, mid);
+  const hrs = hoursSummary(st.hours, 0, mid);
   const gate = clientWorkGate(st);
   const lessons = [...MACHINE_LESSONS, ...NEEDLE_LESSONS, ...SKIN_LESSONS].filter((l) => l.quiz?.length);
   const unlocked = mentorUnlocked() && st.mentor;
 
   root.innerHTML = `
     <h2>The Ledger</h2>
-    <p class="lede">Your record of apprenticeship: legal status, hours, knowledge checks and mentor-verified milestones.</p>
+    <p class="lede">Your record of apprenticeship: practice hours, knowledge checks and mentor-verified milestones.</p>
 
     <section class="panel ${unlocked ? 'mentor-on' : ''}">
       <h3>Mentor Mode ${unlocked ? '<span class="badge st-approved">unlocked</span>' : ''}</h3>
       ${!st.mentor ? `
-        <p class="small">Your supervising mentor registers here with their own passphrase. Only they can sign milestones, confirm your legal status and countersign hours. Hand the device to your mentor for this step.</p>
+        <p class="small">Your supervising mentor registers here with their own passphrase. Only they can sign milestones and countersign hours. Hand the device to your mentor for this step.</p>
         <form id="mentor-register" class="form">
           <label>Mentor full name <input name="name" required></label>
-          <label>Vermont tattooist license # (or credential) <input name="credential" required></label>
-          <label>Shop & shop registration # <input name="shop" required></label>
-          <label>Years actively practising <input type="number" name="years" min="0" required></label>
-          <label><input type="checkbox" name="attest" required> I am a licensed tattooist in good standing, I meet the supervisor requirements in the Vermont rules (at least 3 years of practice, no disciplinary record), and I am this apprentice's supervisor.</label>
+          <label>Shop <input name="shop" required></label>
+          <label>Years tattooing <input type="number" name="years" min="0" required></label>
+          <label><input type="checkbox" name="attest" required> I am a professional tattoo artist and this apprentice's mentor.</label>
           <label>Mentor passphrase (min 10 characters) <input type="password" name="p1" minlength="10" required></label>
           <label>Repeat passphrase <input type="password" name="p2" minlength="10" required></label>
           <button>Register mentor</button>
         </form>` : unlocked ? mentorPanel(st) : `
-        <p>Registered mentor: <b>${esc(st.mentor.name)}</b> (${esc(st.mentor.credential)}), ${esc(st.mentor.shop)}</p>
+        <p>Registered mentor: <b>${esc(st.mentor.name)}</b>, ${esc(st.mentor.shop)}</p>
         <form id="mentor-unlock" class="row"><input type="password" name="p" placeholder="Mentor passphrase" required><button>Unlock Mentor Mode</button></form>
         <details class="small"><summary>Change supervising mentor</summary>
           <p>Removing the mentor voids all of their sign-offs and countersignatures for gating purposes. The records are kept for history. The new mentor must sign again.</p>
           <button id="mentor-reset" class="danger">Remove registered mentor</button></details>`}
-      <p class="muted small">Mentor Mode stops casual self-signing on a shared device. It is not legal identity verification, and it does not replace OPR's forms or the shop's records.</p>
+      <p class="muted small">Mentor Mode stops casual self-signing on a shared device. It is not identity verification.</p>
     </section>
 
     <section class="panel">
-      <h3>Legal status (Vermont)</h3>
-      <form id="legal-form" class="form grid2">
-        <label>Apprentice license # <input name="apprenticeLicense" value="${esc(L.apprenticeLicense || '')}"></label>
-        <label>License expires <input type="date" name="licenseExpires" value="${esc(L.licenseExpires || '')}"></label>
-        <label>Supervising statement filed with OPR <input type="date" name="statementFiled" value="${esc(L.statementFiled || '')}"></label>
-        <label>Shop registration # <input name="shopRegistration" value="${esc(L.shopRegistration || '')}"></label>
-        <label>Universal precautions / BBP course provider <input name="bbpProvider" value="${esc(L.bbpProvider || '')}"></label>
-        <label>Completed <input type="date" name="bbpCompleted" value="${esc(L.bbpCompleted || '')}"></label>
-        <label>Expires / renewal due <input type="date" name="bbpExpires" value="${esc(L.bbpExpires || '')}"></label>
-        <div><button>Save</button></div>
-      </form>
-      <p class="small">${L.confirmedByMentor && L.confirmedByMentor === st.mentor?.id ? `✓ Confirmed by your mentor on ${esc(L.confirmedDate)}.` : 'Not yet confirmed by your mentor. Editing these fields clears any earlier confirmation.'}</p>
-      <p class="muted small">Check every requirement against the current statute, rules and OPR forms: see The Archive → Research.</p>
-    </section>
-
-    <section class="panel">
-      <h3>Apprenticeship hours</h3>
-      <p><b>${hrs.countersigned}</b> mentor-countersigned of ${hrs.target} (logged: ${hrs.logged}). <progress max="100" value="${hrs.pct}"></progress> ${hrs.pct}%</p>
-      <p class="muted small">The OPR supervising statement lists 1,000 hours for a tattooist and counts hours only under an ACTIVE apprentice license. Hours logged before your license was active do not count.</p>
+      <h3>Practice hours</h3>
+      <p><b>${hrs.logged}</b> hours logged, ${hrs.countersigned} countersigned by your mentor.</p>
       <form id="hours-form" class="row">
         <input type="date" name="date" value="${today()}" required>
         <input type="number" name="hours" step="0.25" min="0.25" max="16" placeholder="hours" required>
-        <input name="activity" placeholder="activity (e.g. shop sanitation, supervised session, observation)" required>
+        <input name="activity" placeholder="activity (e.g. synthetic lining drills, observation, drawing)" required>
         <button>Log hours</button></form>
       <table class="tbl"><thead><tr><th>Date</th><th>Hours</th><th>Activity</th><th>Countersigned</th></tr></thead><tbody>
         ${st.hours.slice().reverse().slice(0, 30).map((h) => `<tr><td>${esc(h.date)}</td><td>${esc(h.hours)}</td><td>${esc(h.activity)}</td><td>${h.countersign && h.countersign.mentorId === mid ? `✓ ${esc(h.countersign.mentorName)}` : '-'}</td></tr>`).join('')}
@@ -112,7 +93,6 @@ function mentorPanel(st) {
   const pendingHours = st.hours.filter((h) => !(h.countersign && h.countersign.mentorId === st.mentor.id));
   const sessions = st.clientSessions.filter((s) => !s.mentorNote);
   const reviews = st.healingReviews.filter((r) => !r.mentorNote);
-  const L = st.legal || {};
   return `
     <p>Signed in as <b>${esc(st.mentor.name)}</b>. Auto-locks after 15 minutes. <button id="mentor-lock">Lock now</button></p>
     <form id="signoff-form" class="form">
@@ -124,11 +104,6 @@ function mentorPanel(st) {
       <label><input type="checkbox" name="inperson" required> I observed this directly and in person. It is not based on photos, the AI Mentor or the apprentice's self-report.</label>
       <button>Sign</button>
     </form>
-    <div class="form">
-      <h4>Legal status confirmation</h4>
-      <p class="small">License: ${esc(L.apprenticeLicense || '-')} (expires ${esc(L.licenseExpires || '-')}), statement filed ${esc(L.statementFiled || '-')}, shop ${esc(L.shopRegistration || '-')}, BBP ${esc(L.bbpProvider || '-')} ${esc(L.bbpCompleted || '')}</p>
-      <button id="confirm-legal" ${L.apprenticeLicense ? '' : 'disabled'}>I have seen the license, the filed supervising statement, the shop registration and the BBP certificate, and they are current</button>
-    </div>
     ${pendingHours.length ? `<div class="form"><h4>Countersign hours</h4>
       ${pendingHours.map((h) => `<label><input type="checkbox" class="cs-hour" value="${esc(h.id)}"> ${esc(h.date)} · ${esc(h.hours)} h · ${esc(h.activity)}</label>`).join('')}
       <button id="countersign">Countersign selected</button></div>` : ''}
@@ -145,9 +120,8 @@ function bind(root) {
     e.preventDefault();
     const fd = new FormData(e.target);
     if (fd.get('p1') !== fd.get('p2')) return notify('The passphrases do not match.');
-    if (Number(fd.get('years')) < 3 && !(await confirmIt('The Vermont rules require apprentice supervisors to have practised at least 3 years. Register anyway?', 'Register anyway'))) return;
     const passHash = await hashPassphrase(fd.get('p1'));
-    update((s) => { s.mentor = { id: uid('mentor'), name: fd.get('name').trim(), credential: fd.get('credential').trim(), shop: fd.get('shop').trim(), years: Number(fd.get('years')), passHash, registered: today() }; });
+    update((s) => { s.mentor = { id: uid('mentor'), name: fd.get('name').trim(), credential: fd.get('shop').trim(), shop: fd.get('shop').trim(), years: Number(fd.get('years')), passHash, registered: today() }; });
     mentorUnlockedUntil = Date.now() + MENTOR_SESSION_MS;
     renderLedger(root);
   });
@@ -182,11 +156,6 @@ function bind(root) {
     update((s) => s.signoffs.push({ id: uid('so'), milestoneId: fd.get('milestoneId'), decision: fd.get('decision'), observations: fd.get('observations'), skillsToTrain: fd.get('skillsToTrain'), date: today(), seq: s.seq, inPerson: true, ...sig() }));
   });
 
-  $('#confirm-legal')?.addEventListener('click', () => {
-    if (!requireMentor()) return;
-    update((s) => { s.legal.confirmedByMentor = s.mentor.id; s.legal.confirmedDate = today(); });
-  });
-
   $('#countersign')?.addEventListener('click', () => {
     if (!requireMentor()) return;
     const ids = [...root.querySelectorAll('.cs-hour:checked')].map((c) => c.value);
@@ -204,17 +173,6 @@ function bind(root) {
       if (rec) rec.mentorNote = note;
     });
   }));
-
-  $('#legal-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    update((s) => {
-      const next = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v).trim()]));
-      const changed = Object.keys(next).some((k) => (s.legal[k] || '') !== next[k]);
-      s.legal = { ...s.legal, ...next };
-      if (changed) { delete s.legal.confirmedByMentor; delete s.legal.confirmedDate; }
-    });
-  });
 
   $('#hours-form').addEventListener('submit', (e) => {
     e.preventDefault();

@@ -137,3 +137,7 @@ button.link { background: none; color: var(--red); padding: 0; text-decoration: 
   .subnav a, .mainnav a, .pills a { white-space: nowrap; flex: 0 0 auto; }
   .subnav { border-bottom: 1px solid var(--line); padding-bottom: .3rem; }
 }
+.res { padding-left: 1.1rem; } .res li { margin: .55rem 0; }
+.rs-checked { background: var(--green); color: var(--on-accent); }
+.rs-known { background: var(--blue); color: var(--on-accent); }
+.rs-lead { background: var(--line); color: var(--ink); }

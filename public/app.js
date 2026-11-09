@@ -28,6 +28,11 @@ function render() {
     case 'portfolio': renderPortfolio(main); break;
     default: renderPath(main);
   }
+  // On phones the menus scroll sideways: keep the current item in view.
+  document.querySelectorAll('.mainnav a.active, .subnav a.active').forEach((el) => {
+    const bar = el.parentElement;
+    if (bar.scrollWidth > bar.clientWidth) bar.scrollLeft = el.offsetLeft - bar.offsetLeft - 16;
+  });
   return scrollY;
 }
 

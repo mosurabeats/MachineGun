@@ -1,7 +1,8 @@
 import { SUCCESS_CRITERIA } from '../data/curriculum.js';
 import { WORKSHOP } from '../data/workshop.js';
 import { ARCHIVE } from '../data/archive.js';
-import { RESOURCES, DISAGREEMENTS } from '../data/resources.js';
+import { RESOURCES, RESOURCE_KINDS, DISAGREEMENTS } from '../data/resources.js';
+import { resourceList } from '../lib/ui.js';
 import { getState, update, uid, putFile } from '../lib/store.js';
 import { esc, tag, today, thumbs, hydrateThumbs, evidenceLegend } from '../lib/ui.js';
 import { ALLOCATION_LABELS, normalizeAllocation, weeklyPlan, milestoneStatus, clientWorkGate } from '../lib/logic.js';
@@ -41,7 +42,7 @@ export function renderPath(root) {
   root.innerHTML = `
     <h2>The Path</h2>
     <p class="lede">LINEAGE is a full tattoo apprenticeship program: art and technique together from day one, with the move to human skin made only under supervision.</p>
-    <div class="banner small">The ultimate objective is to become a competent professional tattoo artist who can design, prepare, execute and evaluate tattoos safely. All live tattooing happens under appropriate professional supervision and within applicable law, licensing and public-health standards.</div>
+    <div class="banner small">The ultimate objective is to become a competent professional tattoo artist who can design, prepare, execute and evaluate tattoos safely. Work on people happens with your mentor.</div>
 
     <section class="panel"><h3>Next steps</h3><ol>${next.map((n) => `<li>${n}</li>`).join('')}</ol></section>
 
@@ -73,9 +74,8 @@ export function renderPath(root) {
 
 function nextSteps(st, gate) {
   const out = [];
-  if (!st.mentor) out.push('Find a licensed Vermont tattooist (3+ years, no discipline) willing to supervise you, and have them register in <a href="#/ledger">Mentor Mode</a>.');
-  if (!st.legal?.apprenticeLicense) out.push('Apply for your Vermont apprentice license and file the OPR supervising statement <b>before</b> starting the apprenticeship. See <a href="#/station/supervised">Legal & licensing</a>.');
-  if (!st.legal?.bbpCompleted) out.push('Complete an approved universal precautions / bloodborne pathogens course. See <a href="#/station/safety">Safety Training</a>.');
+  if (!st.mentor) out.push('Have your mentor register in <a href="#/ledger">Mentor Mode</a> so they can sign off your milestones.');
+  out.push('Browse the <a href="#/archive/research">learning resources</a> and pick one book and one video source to work through alongside LINEAGE.');
   if (!st.submissions.length) out.push('Start <a href="#/station/practice/ex.familiar">Machine familiarity</a> on synthetic skin.');
   else out.push(`Continue the <a href="#/station/practice">synthetic-skin assignments</a> (${st.submissions.length} submissions so far).`);
   if (Object.keys(st.workshop).length < 3) out.push('Keep a daily drawing practice in <a href="#/workshop">The Workshop</a>.');
@@ -101,7 +101,8 @@ export function renderWorkshop(root, unitId) {
           ${unit.exercises.map((e) => `<label><input type="checkbox" data-task="${e.id}" ${st.workshop[e.id] ? 'checked' : ''}> ${esc(e.t)} ${st.workshop[e.id] ? `<span class="muted small">(${esc(st.workshop[e.id])})</span>` : ''}</label>`).join('')}
         </section>
         <section class="panel"><h4>Critique criteria</h4><ul>${unit.critique.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
-          <p class="small">Upload your work to <a href="#/portfolio">The Portfolio</a> and ask <a href="#/mentor?type=design">The Mentor</a> to critique it against these criteria. Bring physical work to your mentor too.</p></section>`
+          <p class="small">Upload your work to <a href="#/portfolio">The Portfolio</a> and ask <a href="#/mentor?type=design">The Mentor</a> to critique it against these criteria. Bring physical work to your mentor too.</p></section>
+        ${relatedResources(unit.id)}`
         : `<p>Choose a unit. Work through them in order, but keep daily line practice (unit 1) going throughout.</p>
            <div class="grid2">${WORKSHOP.map((u) => `<a class="tile" href="#/workshop/${u.id}"><h4>${esc(u.title)}</h4><p class="small muted">${count(u)}/${u.exercises.length} exercises</p></a>`).join('')}</div>`}
       </div>
@@ -109,29 +110,37 @@ export function renderWorkshop(root, unitId) {
   root.querySelectorAll('[data-task]').forEach((c) => c.addEventListener('change', () => update((s) => { if (c.checked) s.workshop[c.dataset.task] = today(); else delete s.workshop[c.dataset.task]; })));
 }
 
+function relatedResources(id) {
+  const list = RESOURCES.filter((r) => r.for?.includes(id));
+  return list.length ? `<section class="panel"><h4>Study with</h4>${resourceList(list)}</section>` : '';
+}
+
 // ------------------------------------------------------------------ Archive
 export function renderArchive(root, sub) {
   const st = getState();
-  const kinds = [['regulation', 'Regulation'], ['safety', 'Public health & safety'], ['education', 'Professional education'], ['equipment', 'Equipment & manufacturers'], ['community', 'Community']];
   const ch = ARCHIVE.find((a) => a.id === sub);
   root.innerHTML = `
     <h2>The Archive</h2>
-    <nav class="pills"><a href="#/archive" class="${sub !== 'research' ? 'active' : ''}">History & theory</a><a href="#/archive/research" class="${sub === 'research' ? 'active' : ''}">Research library</a></nav>
+    <nav class="pills"><a href="#/archive" class="${sub !== 'research' ? 'active' : ''}">History & theory</a><a href="#/archive/research" class="${sub === 'research' ? 'active' : ''}">Learning resources</a></nav>
     ${sub === 'research' ? `
-      <p class="lede">Sources for professional technical tattoo education. ✓ marks sources checked during research. Everything else is a lead to investigate. Always confirm the current regulatory text with the regulator.</p>
-      ${kinds.map(([k, label]) => `<h3>${esc(label)}</h3><ul class="res">${RESOURCES.filter((r) => r.kind === k).map((r) => `<li>${r.verified ? '✓ ' : ''}${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : `<b>${esc(r.title)}</b>`}<br><span class="small">${esc(r.note)}</span></li>`).join('')}</ul>`).join('')}
+      <p class="lede">Courses, video channels, books and references to study alongside LINEAGE. The same resources also appear next to the lessons and units they support.</p>
+      <p class="small"><span class="badge rs-checked">checked</span> confirmed in research · <span class="badge rs-known">established</span> long-standing, widely used · <span class="badge rs-lead">lead</span> found in listings only; check it before paying</p>
+      <nav class="pills">${RESOURCE_KINDS.map(([k, label]) => `<a href="#res-${k}" data-jump="res-${k}">${esc(label)}</a>`).join('')}</nav>
+      ${RESOURCE_KINDS.map(([k, label]) => `<h3 id="res-${k}">${esc(label)}</h3>${resourceList(RESOURCES.filter((r) => r.kind === k))}`).join('')}
       <h3>Where educators disagree</h3>${evidenceLegend()}
       ${DISAGREEMENTS.map((d) => `<details class="topic"><summary>${esc(d.topic)} ${tag(d.evidence)}</summary><ul>${d.positions.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><p><b>LINEAGE's approach:</b> ${esc(d.lineage)}</p></details>`).join('')}
     ` : ch ? `
       <p><a href="#/archive">← All chapters</a></p>
       <h3>${esc(ch.title)}</h3>
       ${ch.sections.map((x) => `<section><h4>${esc(x.h)}</h4>${x.p.map((p) => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
+      ${relatedResources(ch.id)}
       <label><input type="checkbox" id="ch-read" ${st.lessonsRead?.[ch.id] ? 'checked' : ''}> Mark chapter as read</label>
       <p class="small">Test yourself in the <a href="#/station/questions/history">history question bank</a>.</p>
     ` : `
       <p class="lede">Tattoo history and technical theory: the 15% that explains why traditional work looks the way it does. Approach other cultures' traditions with respect. Many carry lineage or sacred meaning and are not styles to copy.</p>
       <div class="grid2">${ARCHIVE.map((a) => `<a class="tile" href="#/archive/${a.id}"><h4>${st.lessonsRead?.[a.id] ? '✓ ' : ''}${esc(a.title)}</h4></a>`).join('')}</div>
       <p class="small">Technical theory (machine electromagnetism, rotary mechanics, pigment biology) is taught in depth in <a href="#/station/machines">The Station</a>.</p>`}`;
+  root.querySelectorAll('[data-jump]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); root.querySelector(`#${a.dataset.jump}`)?.scrollIntoView({ behavior: 'smooth' }); }));
   root.querySelector('#ch-read')?.addEventListener('change', (e) => update((s) => { s.lessonsRead = s.lessonsRead || {}; if (e.target.checked) s.lessonsRead[ch.id] = today(); else delete s.lessonsRead[ch.id]; }));
 }
 

@@ -61,10 +61,10 @@ export const ARCHIVE = [
     ],
   },
   {
-    id: 'ar.modern', title: 'The modern trade and regulation',
+    id: 'ar.modern', title: 'The modern trade',
     sections: [
-      { h: 'Health and regulation', p: [
-        'Concerns about bloodborne disease led to tattoo regulation in many places. New York City banned tattooing in 1961 after a hepatitis outbreak and did not legalise it again until 1997. Modern practice is built on infection control: single-use needles, barriers, sterilisation and bloodborne-pathogen training. Licensing systems vary widely by state and country. In Vermont, OPR licenses tattooists.',
+      { h: 'Health and hygiene', p: [
+        'Concerns about bloodborne disease led to tattoo regulation in many places. New York City banned tattooing in 1961 after a hepatitis outbreak and did not legalise it again until 1997. Modern practice is built on infection control: single-use needles, barriers, sterilisation and bloodborne-pathogen training.',
       ]},
       { h: 'Styles today', p: [
         'Neo-traditional, Japanese-influenced, black and grey, realism, fine-line, blackwork, illustrative, lettering and many more. Traditional fundamentals (line, black, placement, readability) underpin all of them.',

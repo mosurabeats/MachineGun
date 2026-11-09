@@ -1,46 +1,111 @@
-// Tattooing Resource Research (section 9). Entries marked `verified: true` were
-// checked against the source during research (Nov 2026). Others are leads to
-// investigate: their scope, cost and current status should be confirmed before
-// you rely on them. `kind` drives filtering.
+// Learning resources. `status`:
+//   'checked' : found and confirmed during research (Nov 2026)
+//   'known'   : long-established, widely cited title or site; not re-checked for this release
+//   'lead'    : seen only in secondary listings; confirm it exists and is any good before paying
+// `for` lists LINEAGE units/pages the resource supports, so it can be shown in context.
+// Links to YouTube searches are used where a channel was found but its exact URL wasn't confirmed.
+
+const yt = (q) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+
+export const RESOURCE_KINDS = [
+  ['course', 'Courses & platforms'],
+  ['video', 'Video channels'],
+  ['drawing', 'Drawing, color & lettering'],
+  ['flash', 'Flash & tattoo history'],
+  ['book', 'Technique books'],
+  ['machines', 'Machines & equipment'],
+  ['safety', 'Skin, hygiene & safety knowledge'],
+  ['community', 'Community'],
+];
 
 export const RESOURCES = [
-  // Regulation & public health
-  { id: 'vt-statute', kind: 'regulation', title: 'Vermont statute: Tattooists and Body Piercers (26 V.S.A. ch. 79)', url: 'https://legislature.vermont.gov/statutes/fullchapter/26/079', verified: true,
-    note: 'Requires OPR registration/licensure for tattooists, apprentice registration before the apprenticeship begins, and shop registration.' },
-  { id: 'vt-rules', kind: 'regulation', title: 'Vermont Administrative Rules for Tattooing and Body Piercing (CVR 04-030-310)', url: 'https://www.law.cornell.edu/regulations/vermont/04-310-Code-Vt-R-04-030-310-X', verified: true,
-    note: 'Sets apprenticeship, supervisor (≥3 years practice, no discipline), sanitation and record-keeping rules. The SOS-hosted PDF is dated 2004, so confirm which version is current with OPR.' },
-  { id: 'vt-opr', kind: 'regulation', title: 'Vermont OPR: Tattooist & Body Piercer profession page and forms', url: '', verified: false,
-    note: 'Find it from sos.vermont.gov > Office of Professional Regulation. Holds application instructions and the supervising statement form (which lists 1,000 hours for a tattooist and requires an active apprentice license).' },
-  { id: 'vt-supervise', kind: 'regulation', title: 'OPR supervising statement form (PDF)', url: 'https://outside.vermont.gov/dept/sos/office_professional_regulation/professions/tattooist_body_piercer/tattooist_body_piercer_supervising_statement_form.pdf', verified: true,
-    note: 'Must be completed before the apprenticeship starts.' },
-  { id: 'osha-bbp', kind: 'safety', title: 'OSHA Bloodborne Pathogens Standard, 29 CFR 1910.1030', url: 'https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030', verified: true,
-    note: 'Exposure control plans, universal precautions, PPE, sharps and regulated waste. OSHA has issued interpretation letters on its application to tattoo shops.' },
-  { id: 'fda-ink', kind: 'safety', title: 'FDA: Tattoos & Permanent Makeup (ink safety, recalls, reporting)', url: 'https://www.fda.gov/cosmetics/cosmetic-products/tattoos-temporary-tattoos-permanent-makeup', verified: false,
-    note: 'Ink advisories and recalls, including 2025 contaminated-ink warnings. Report reactions with brand and lot number.' },
-  { id: 'cdc-tattoo', kind: 'safety', title: 'CDC MMWR: tattoo-associated nontuberculous mycobacterial infections (2012)', url: 'https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6133a3.htm', verified: true,
-    note: 'Outbreaks linked to contaminated ink and dilution with non-sterile water. The CDC recommends artists avoid non-sterile dilution.' },
-  { id: 'cdc-hand', kind: 'safety', title: 'CDC: Hand hygiene guidance', url: 'https://www.cdc.gov/clean-hands/', verified: false, note: 'General hand-hygiene evidence base.' },
-  { id: 'bbp-courses', kind: 'safety', title: 'Bloodborne pathogen courses for tattooists', url: '', verified: false,
-    note: 'Several providers sell tattoo-specific BBP courses. Confirm with OPR which courses satisfy Vermont\'s universal-precautions requirement before buying.' },
+  // ------------------------------------------------------------ courses
+  { id: 'tattooing101', kind: 'course', status: 'checked', title: 'Tattooing 101: Artist Accelerator and other courses', url: 'https://elitetattoopro.teachable.com/',
+    note: 'Paid, self-paced courses: the Artist Accelerator (history, terminology, sanitation, lining, shading, color), a 30-day flash challenge and a realism course. Structured and beginner-friendly, but marketing-heavy. Best used as a second explanation of what LINEAGE teaches.',
+    for: ['trk.lining', 'trk.bng', 'trk.color', 'ws.flash'] },
+  { id: 'fireside', kind: 'course', status: 'checked', title: 'Fireside Tattoo Network (Jake Meeks)', url: 'https://tattoonow.com/tattoo-news/inside-fireside-events~30988',
+    note: 'Founded by Jake Meeks (about 30 years tattooing). Fireside Foundations covers the design method and drawing for the body. There is also an advanced "Simplify" course, a membership club with live drawing and technique talks, and the long-running Fireside Tattoo Podcast. Strongest for design and for hearing how working artists think.',
+    for: ['ws.shape', 'ws.tattooable', 'ws.trad', 'trk.trad'] },
+  { id: 'nucleus', kind: 'course', status: 'checked', title: 'Tattoo Nucleus: Tattoo Basics (lining, shading, stipple shading)', url: 'https://tattoonucleus.vhx.tv/products/tattoo-basics-lining-shading-stipple-shading',
+    note: 'Paid video lessons from a working artist on the core hand techniques. Pairs with the Lining and Black and Gray tracks.',
+    for: ['trk.lining', 'trk.bng'] },
+  { id: 'tattoosmart', kind: 'course', status: 'lead', title: 'Tattoo Smart', url: '',
+    note: 'No reliable listing was found under this name. Confirm it exists, who teaches it and what it covers before paying.', for: [] },
 
-  // Professional education
-  { id: 'tattooing101', kind: 'education', title: 'Tattooing 101: Artist Accelerator Program and courses', url: 'https://elitetattoopro.teachable.com/', verified: true,
-    note: 'Paid, self-paced online courses: the Artist Accelerator (history, terminology, sanitation, lining, shading, color), a 30-day flash challenge and a realism course, plus a studio partnership program. Reviews describe a structured but marketing-heavy product. Use it as theory alongside, never instead of, your in-person apprenticeship. Check current prices.' },
-  { id: 'fireside', kind: 'education', title: 'Fireside Tattoo Network (Jake Meeks)', url: 'https://tattoonow.com/tattoo-news/inside-fireside-events~30988', verified: true,
-    note: 'Founded by Jake Meeks (nearly 30 years tattooing). Offers Fireside Foundations (design method, drawing for the body), the "Simplify" course, a membership club with live drawing and technique talks, and the long-running Fireside Tattoo Podcast. Strongest for design, drawing and hearing working artists\' views.' },
-  { id: 'tattoosmart', kind: 'education', title: 'Tattoo Smart', url: '', verified: false,
-    note: 'Could not be verified in research (Nov 2026): no reliable listing was found under this name. Before paying, confirm it exists, who teaches it and what it covers.' },
-  { id: 'manufacturers', kind: 'equipment', title: 'Machine & needle manufacturers\' manuals and education pages', url: '', verified: false,
-    note: 'The authoritative source for your exact machine\'s stroke, voltage range, cartridge compatibility, cleaning and maintenance. Always prefer these over generic charts.' },
-  { id: 'builders', kind: 'equipment', title: 'Coil machine building & tuning resources', url: '', verified: false,
-    note: 'Builder-run courses and forums on tuning coils (springs, contact gap, capacitors). Practices differ widely between builders.' },
-  { id: 'conventions', kind: 'education', title: 'Tattoo conventions & seminars', url: '', verified: false,
-    note: 'Many conventions run technical seminars. Observing working artists in person is valuable observation-assignment material.' },
-  { id: 'forums', kind: 'community', title: 'Apprenticeship forums & communities', url: '', verified: false,
-    note: 'Useful for perspective. Quality varies widely, and unlicensed "scratcher" advice is common. Never treat forum advice as supervision.' },
-  { id: 'videos', kind: 'education', title: 'Experienced artists\' educational videos', url: '', verified: false,
-    note: 'Use them for demonstration study. Write down the artist, their style and what they assume about equipment.' },
+  // ------------------------------------------------------------ video
+  { id: 'yt-t101', kind: 'video', status: 'lead', title: 'Tattooing 101 (YouTube): lining and shading tutorials', url: yt('Tattooing 101 shading tutorial for beginners'),
+    note: 'Free tutorials, including a widely watched beginner shading video and lining basics. Good for demonstration study.', for: ['trk.lining', 'trk.bng'] },
+  { id: 'yt-meherzi', kind: 'video', status: 'lead', title: 'Fani Meherzi Tattoo: shading and lining guides', url: yt('Fani Meherzi tattoo shading guide for beginners'),
+    note: 'Beginner guides covering several shading techniques and solid lines.', for: ['trk.lining', 'trk.bng'] },
+  { id: 'yt-bronson', kind: 'video', status: 'lead', title: 'The Real Bronson: beginner lining tutorial', url: yt('The Real Bronson beginner lining tutorial how to tattoo'),
+    note: 'A popular, clear lining walkthrough.', for: ['trk.lining'] },
+  { id: 'yt-levgen', kind: 'video', status: 'lead', title: 'Levgen Tattoo Tutorials', url: yt('Levgen tattoo tutorials'),
+    note: 'Tutorials and pro tips on shading, lining and color from an artist with over 15 years of experience.', for: ['trk.lining', 'trk.bng', 'trk.color'] },
+  { id: 'yt-3rl', kind: 'video', status: 'lead', title: '3RL: stipple shading', url: yt('3RL stipple shading tattoo'),
+    note: 'Often recommended specifically for stipple and whip-style shading.', for: ['trk.bng'] },
+  { id: 'yt-unseen', kind: 'video', status: 'lead', title: 'Unseen Level', url: yt('Unseen Level tattoo'),
+    note: 'Demonstrations of design basics, needle choice and shading.', for: ['trk.bng', 'ws.tattooable'] },
+  { id: 'yt-proko', kind: 'video', status: 'known', title: 'Proko: drawing fundamentals and anatomy', url: 'https://www.youtube.com/@ProkoTV',
+    note: 'Free, high-quality lessons on figure drawing, anatomy, form and shading. Very useful for placement and for drawing animals and figures in traditional work.', for: ['ws.form', 'ws.shape', 'tr.anatomy'] },
+
+  // ------------------------------------------------------------ drawing
+  { id: 'drawabox', kind: 'drawing', status: 'known', title: 'Drawabox (free drawing course)', url: 'https://drawabox.com/',
+    note: 'Free structured course built on confident, ghosted lines, ellipses and 3D form: exactly the habits tattoo lines need. Start with Lesson 0 and Lesson 1 alongside Workshop unit 1.', for: ['ws.line', 'ws.form'] },
+  { id: 'loomis', kind: 'drawing', status: 'known', title: 'Andrew Loomis: Fun with a Pencil; Figure Drawing for All It\'s Worth', url: '',
+    note: 'Classic drawing instruction books on construction, form and the figure.', for: ['ws.form', 'ws.shape'] },
+  { id: 'edwards', kind: 'drawing', status: 'known', title: 'Betty Edwards: Drawing on the Right Side of the Brain', url: '',
+    note: 'A widely used book for learning to see and draw accurately. Useful if you are early in drawing.', for: ['ws.line', 'ws.shape'] },
+  { id: 'gurney', kind: 'drawing', status: 'known', title: 'James Gurney: Color and Light', url: '',
+    note: 'A clear guide to value, color and light for painters. Read it with Workshop unit 5 and the color track.', for: ['ws.color', 'ws.form', 'trk.color'] },
+  { id: 'speedball', kind: 'drawing', status: 'known', title: 'The Speedball Textbook (lettering)', url: '',
+    note: 'A long-running lettering reference with many alphabets. Good for building script and block hands.', for: ['ws.lettering'] },
+  { id: 'stevens', kind: 'drawing', status: 'known', title: 'Mike Stevens: Mastering Layout (sign painting)', url: '',
+    note: 'Sign-painting layout and lettering principles. Tattoo lettering comes from the same tradition.', for: ['ws.lettering'] },
+
+  // ------------------------------------------------------------ flash & history
+  { id: 'sj-flash', kind: 'flash', status: 'checked', title: 'Sailor Jerry Tattoo Flash, Volumes One and Two (Hardy Marks)', url: 'https://hardymarks.com/products/sailor-jerry-tattoo-flash-volume-two',
+    note: 'Full-color flash sheets by Norman "Sailor Jerry" Collins (Volume Two: 50 sheets from 1940 to 1973), with an introduction by Don Ed Hardy. The best single study source for traditional line, black placement and palette.', for: ['ws.trad', 'ws.flash', 'trk.trad', 'tr.black', 'cl.palette'] },
+  { id: 'flash-past', kind: 'flash', status: 'checked', title: 'Flash from the Past: Classic American Tattoo Designs 1890–1965', url: 'https://docarts.com/flash_from_the_past.html',
+    note: 'Flash by Sailor Jerry, Gus Wagner, Bert Grimm, Owen Jensen, Ben Corday and others. Shows how the traditional vocabulary developed.', for: ['ws.trad', 'ar.traditional', 'ar.western'] },
+  { id: 'tattootime', kind: 'flash', status: 'lead', title: 'Tattootime (Don Ed Hardy\'s publication series)', url: '',
+    note: 'Influential 1980s–90s series on tattoo art and history. Look for reissues from Hardy Marks.', for: ['ar.traditional', 'ar.japan'] },
+  { id: 'gilbert', kind: 'flash', status: 'known', title: 'Steve Gilbert: Tattoo History: A Source Book', url: '',
+    note: 'An anthology of historical writing about tattooing across cultures. Background reading for The Archive.', for: ['ar.ancient', 'ar.western'] },
+
+  // ------------------------------------------------------------ technique books
+  { id: 'jordan', kind: 'book', status: 'lead', title: 'C.R. Jordan & Yolanda Jordan: Basic Fundamentals of Modern Tattoo', url: '',
+    note: 'Reported to cover machine building and which needle configurations suit which tasks. Check reviews and the edition date before buying.', for: ['mach.coil', 'ndl.selection'] },
+
+  // ------------------------------------------------------------ machines
+  { id: 'manufacturers', kind: 'machines', status: 'known', title: 'Your machine and needle makers\' manuals and education pages', url: '',
+    note: 'The authority on your exact machine\'s stroke, voltage range, cartridge compatibility, cleaning and maintenance. Read them before any generic chart.', for: ['mach.rotary', 'mach.voltage', 'mach.maintenance', 'ndl.cartridge-vs-bar'] },
+  { id: 'alison-machine', kind: 'machines', status: 'checked', title: 'Alison: Fundamentals of Tattoo Machine Optimization (free)', url: 'https://alison.com/course/fundamentals-of-tattoo-machine-optimization',
+    note: 'A free 4–5 hour online course on coil machine parts: frame, springs, contact screw and tuning. Pairs with the coil machine lesson.', for: ['mach.coil'] },
+  { id: 'udemy-machine', kind: 'machines', status: 'checked', title: 'Udemy: Tattoo Machine Building / rebuild and tuning', url: 'https://www.udemy.com/course/tattoo-machine-building/',
+    note: 'A low-cost course on rebuilding and tuning coil machines.', for: ['mach.coil'] },
+
+  // ------------------------------------------------------------ skin & safety knowledge
+  { id: 'osha-bbp', kind: 'safety', status: 'checked', title: 'OSHA Bloodborne Pathogens Standard (29 CFR 1910.1030)', url: 'https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.1030',
+    note: 'The source text behind universal precautions, PPE, sharps and waste handling. Read it as a study text with the Safety Training page.', for: ['safety'] },
+  { id: 'bbp-courses', kind: 'safety', status: 'known', title: 'Bloodborne pathogens courses for tattoo artists', url: '',
+    note: 'Many providers offer short tattoo-specific courses. Take one early in your apprenticeship. Your mentor can recommend one.', for: ['safety'] },
+  { id: 'cdc-tattoo', kind: 'safety', status: 'checked', title: 'CDC MMWR: tattoo-associated infections from contaminated ink (2012)', url: 'https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6133a3.htm',
+    note: 'A case study of why ink handling matters: outbreaks traced to contaminated ink and dilution with non-sterile water.', for: ['safety', 'cl.pigment'] },
+  { id: 'fda-ink', kind: 'safety', status: 'known', title: 'FDA: tattoo ink safety, advisories and reporting', url: 'https://www.fda.gov/cosmetics/cosmetic-products/tattoos-temporary-tattoos-permanent-makeup',
+    note: 'Ink recalls and warnings, including 2025 contaminated-ink alerts.', for: ['safety', 'cl.pigment'] },
+  { id: 'cdc-hand', kind: 'safety', status: 'known', title: 'CDC: hand hygiene guidance', url: 'https://www.cdc.gov/clean-hands/',
+    note: 'When and how to wash hands and use sanitiser. The basis of every glove change.', for: ['safety'] },
+  { id: 'dermnet', kind: 'safety', status: 'known', title: 'DermNet: tattoo complications (dermatology reference)', url: 'https://dermnetnz.org/topics/tattoo',
+    note: 'Dermatologist-written pages on tattoo reactions, infection and other complications. Helps you recognise problems and refer them.', for: ['skin.healing', 'skin.retention', 'skin.stop'] },
+
+  // ------------------------------------------------------------ community
+  { id: 'conventions', kind: 'community', status: 'known', title: 'Tattoo conventions and seminars', url: '',
+    note: 'Watch working artists up close and attend technique seminars. Excellent material for observation assignments.', for: ['observe'] },
+  { id: 'forums', kind: 'community', status: 'known', title: 'Apprentice forums and communities', url: '',
+    note: 'Good for perspective. Quality varies a lot, so check advice against your mentor and this curriculum.', for: [] },
 ];
+
+export const resourcesFor = (id) => RESOURCES.filter((r) => r.for?.includes(id));
 
 // Where professional educators disagree. Each entry presents positions, the
 // evidence status, and what LINEAGE does about it.
@@ -67,8 +132,8 @@ export const DISAGREEMENTS = [
     'Charts of "lining at X volts, shading at Y".',
     'The view that voltage numbers are meaningless across machines and power supplies.',
   ], evidence: 'ind', lineage: 'Tune to the result on your own machine, using the manufacturer\'s guidance.' },
-  { topic: 'Online-only courses as an apprenticeship', positions: [
-    'Some online programs market themselves as apprenticeships.',
-    'Professional consensus, and Vermont law, require in-person supervised apprenticeship under a licensed supervisor.',
-  ], evidence: 'reg', lineage: 'Online study, LINEAGE included, never authorises tattooing a person.' },
+  { topic: 'Online courses vs in-person learning', positions: [
+    'Online courses make good instruction widely available and let you replay demonstrations.',
+    'Many artists hold that hand skills, depth and skin-reading only develop with in-person feedback.',
+  ], evidence: 'ind', lineage: 'Use courses and videos for theory and demonstration study. Build hand skills on synthetic skin with feedback, and learn skin work with your mentor.' },
 ];

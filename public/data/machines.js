@@ -179,7 +179,7 @@ export const MACHINE_LESSONS = [
     summary: 'Inspection, barrier protection, disinfection and routine maintenance, following the manufacturer\'s instructions.',
     sections: [
       { h: 'Before every procedure', tag: 'reg', p: [
-        'Inspect the machine, cords and grip. Most machine bodies cannot be sterilised. They are cleaned and disinfected according to the manufacturer\'s instructions and covered with barrier bags. Single-use items (cartridges, needles, disposable grips and tubes) are opened in front of the client and are not reused. Vermont\'s tattooing rules and OSHA\'s Bloodborne Pathogens Standard (29 CFR 1910.1030) set the baseline for shop practice. Read the current text.',
+        'Inspect the machine, cords and grip. Most machine bodies cannot be sterilised. They are cleaned and disinfected according to the manufacturer\'s instructions and covered with barrier bags. Single-use items (cartridges, needles, disposable grips and tubes) are opened in front of the client and are not reused. OSHA\'s Bloodborne Pathogens Standard (29 CFR 1910.1030) is a good reference for the infection-control practices behind every shop routine.',
       ]},
       { h: 'Routine maintenance', tag: 'ind', p: [
         'Coil machines: inspect contact points for pitting, check springs for fatigue, replace O-rings and grommets. Rotaries and pens: many are sealed units that need manufacturer service. Do not oil a machine unless its manufacturer tells you to. Keep a maintenance log for each machine.',

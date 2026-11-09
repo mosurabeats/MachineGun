@@ -2,6 +2,7 @@ import { EVIDENCE } from '../data/evidence.js';
 import { getState, update, fileURL } from './store.js';
 import { scoreQuiz } from './logic.js';
 import { diagram } from './diagrams.js';
+import { resourcesFor } from '../data/resources.js';
 import { MACHINES_DEEP } from '../data/deep/machines.js';
 import { NEEDLES_DEEP, SKIN_DEEP } from '../data/deep/needles-skin.js';
 
@@ -39,6 +40,12 @@ export function lessonHTML(lesson) {
   </article>`;
 }
 
+const STATUS = { checked: 'checked', known: 'established', lead: 'lead' };
+/** Render a list of learning resources with status badges and links. */
+export function resourceList(list) {
+  return `<ul class="res">${list.map((r) => `<li>${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : `<b>${esc(r.title)}</b>`} <span class="badge rs-${r.status}">${STATUS[r.status] || r.status}</span><br><span class="small">${esc(r.note)}</span></li>`).join('')}</ul>`;
+}
+
 function deepHTML(lesson) {
   const d = DEEP[lesson.id];
   if (!d) return '';
@@ -47,7 +54,8 @@ function deepHTML(lesson) {
     ${(d.sections || []).map((s) => `<section><h4>${esc(s.h)} ${tag(s.tag)}</h4>${s.p.map((p) => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
     ${(d.examples || []).map((e) => `<div class="example"><strong>${esc(e.t)}</strong><p>${esc(e.p)}</p></div>`).join('')}
     ${d.mistakes?.length ? `<h4>Common mistakes</h4><table class="tbl"><thead><tr><th>Mistake</th><th>Why it matters</th><th>Fix</th></tr></thead><tbody>${d.mistakes.map((m) => `<tr><td>${esc(m.m)}</td><td>${esc(m.why)}</td><td>${esc(m.fix)}</td></tr>`).join('')}</tbody></table>` : ''}
-    ${d.drills?.length ? `<div class="drills"><strong>Drills</strong><ol>${d.drills.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}`;
+    ${d.drills?.length ? `<div class="drills"><strong>Drills</strong><ol>${d.drills.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}
+    ${resourcesFor(lesson.id).length ? `<div class="drills"><strong>Study with</strong>${resourceList(resourcesFor(lesson.id))}</div>` : ''}`;
 }
 
 function quizHTML(lesson) {
