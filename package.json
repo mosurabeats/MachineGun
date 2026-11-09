@@ -1,0 +1,15 @@
+{
+  "name": "lineage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LINEAGE: a professional tattoo apprenticeship and education platform",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0"
+  }
+}
