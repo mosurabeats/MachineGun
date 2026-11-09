@@ -106,6 +106,25 @@ export async function filesToImages(files, maxImages = 6) {
   return out;
 }
 
+/** Image Blobs for the hosted AI Mentor: images as-is when accepted, others and video frames as JPEG. */
+export async function filesToBlobs(files, maxImages = 6) {
+  const OK = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const toBlob = (img) => {
+    const bin = atob(img.data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new File([bytes], img.label || 'frame.jpg', { type: img.media_type });
+  };
+  const out = [];
+  for (const f of files) {
+    if (out.length >= maxImages) break;
+    if (OK.includes(f.type)) out.push(f);
+    else if (f.type.startsWith('image/')) out.push(toBlob(await imageToJpeg(f)));
+    else if (f.type.startsWith('video/')) out.push(...(await videoFrames(f, Math.min(3, maxImages - out.length))).map(toBlob));
+  }
+  return out;
+}
+
 async function imageToJpeg(file, maxDim = 1568) {
   const bmp = await createImageBitmap(file);
   const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));

@@ -12,6 +12,10 @@ ANTHROPIC_API_KEY=sk-ant-... npm start     # http://localhost:3000
 npm test
 ```
 
+### Hosted version (phone-friendly)
+
+`npm run build:artifact` bundles the app into one file, `dist/lineage.html`, which is published as a private claude.ai page. In the hosted version, the AI Mentor runs on the viewer's own Claude account (it asks permission on first use) and backups save through the page's save prompt. Records stay in that browser only, so data entered on your phone does not appear on your computer.
+
 Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. Data is kept in the browser: localStorage for records, IndexedDB for photos and video. The server stores nothing. It serves the app and forwards AI Mentor requests so the API key stays off the browser.
 
 ## Sections

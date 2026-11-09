@@ -1,6 +1,7 @@
 import { EXERCISES } from '../data/practice.js';
 import { getState, update, uid, getFile } from '../lib/store.js';
-import { esc, today, filesToImages } from '../lib/ui.js';
+import { esc, today, filesToImages, filesToBlobs } from '../lib/ui.js';
+import { askMentor, mentorMode } from '../lib/runtime.js';
 import { aiSummary } from './station.js';
 
 export const UPLOAD_TYPES = [
@@ -38,9 +39,13 @@ export function renderMentor(root, params) {
     <h3>History</h3>
     ${st.aiLog.length ? st.aiLog.slice().reverse().slice(0, 20).map((a) => `<details class="topic"><summary>${esc(a.date)} · ${esc(UPLOAD_TYPES.find((t) => t.id === a.type)?.label || a.type)}</summary>${aiSummary(a.result)}</details>`).join('') : '<p class="muted">No reviews yet.</p>'}`;
 
-  fetch('/api/health').then((r) => r.json()).then((h) => {
-    root.querySelector('#ai-status').textContent = h.ai ? 'AI Mentor online.' : 'AI Mentor offline: the server has no ANTHROPIC_API_KEY configured. See README.';
-  }).catch(() => { root.querySelector('#ai-status').textContent = 'AI Mentor unavailable: start LINEAGE with `npm start`.'; });
+  mentorMode().then((m) => {
+    const el = root.querySelector('#ai-status');
+    if (!el) return;
+    el.textContent = m === 'hosted' ? 'AI Mentor online. Reviews use your own Claude account; the first request asks your permission.'
+      : m === 'server' ? 'AI Mentor online.'
+      : 'AI Mentor offline. Locally, start LINEAGE with ANTHROPIC_API_KEY set (see README); hosted, open the page inside claude.ai.';
+  });
 
   root.querySelector('#ai-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -50,22 +55,25 @@ export function renderMentor(root, params) {
     if (sub) for (const id of sub.fileIds) { const rec = await getFile(id); if (rec) files.push(new File([rec.blob], rec.name, { type: rec.type })); }
     const kind = fd.get('type');
     if (!files.length && !fd.get('notes').trim()) { out.innerHTML = '<p class="warn">Add an upload or notes.</p>'; return; }
-    out.innerHTML = '<p class="muted">Reviewing…</p>';
+    out.innerHTML = '<p class="muted">Reviewing… this can take up to a minute.</p>';
+    e.target.querySelector('button').disabled = true;
     try {
-      const images = await filesToImages(files);
-      const res = await fetch('/api/mentor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadType: kind, exerciseId: fd.get('exerciseId') || null, notes: fd.get('notes'), images }),
+      const hostedMode = (await mentorMode()) === 'hosted';
+      const result = await askMentor({
+        uploadType: kind,
+        exerciseId: fd.get('exerciseId') || null,
+        notes: fd.get('notes'),
+        images: hostedMode ? undefined : await filesToImages(files),
+        blobs: hostedMode ? await filesToBlobs(files) : undefined,
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || res.statusText);
+      const body = { result };
       update((s) => s.aiLog.push({ id: uid('ai'), source: 'ai', type: kind, submissionId: sub?.id || null, exerciseId: fd.get('exerciseId') || null, date: today(), result: body.result }));
       // re-render shows history; show the newest result on top
       renderMentor(root, params);
       root.querySelector('#ai-out').innerHTML = `<h3>Feedback</h3>${aiSummary(body.result)}`;
     } catch (err) {
       out.innerHTML = `<p class="warn">Could not get feedback: ${esc(err.message)}</p>`;
+      e.target.querySelector('button').disabled = false;
     }
   });
 }

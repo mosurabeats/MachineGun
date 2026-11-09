@@ -5,6 +5,8 @@ import { SKIN_LESSONS } from '../data/skin.js';
 import { HEALING_CHECKPOINTS } from '../lib/logic.js';
 import { getState, update, uid, exportJSON, importJSON } from '../lib/store.js';
 import { esc, today } from '../lib/ui.js';
+import { notify, confirmIt } from '../lib/dialog.js';
+import { saveText } from '../lib/runtime.js';
 import { hashPassphrase, verifyPassphrase, hoursSummary, milestoneStatus, clientWorkGate } from '../lib/logic.js';
 
 // Mentor Mode unlock lives only in memory and expires automatically.
@@ -142,8 +144,8 @@ function bind(root) {
   $('#mentor-register')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    if (fd.get('p1') !== fd.get('p2')) return alert('Passphrases do not match.');
-    if (Number(fd.get('years')) < 3 && !confirm('The Vermont rules require apprentice supervisors to have practised at least 3 years. Register anyway?')) return;
+    if (fd.get('p1') !== fd.get('p2')) return notify('The passphrases do not match.');
+    if (Number(fd.get('years')) < 3 && !(await confirmIt('The Vermont rules require apprentice supervisors to have practised at least 3 years. Register anyway?', 'Register anyway'))) return;
     const passHash = await hashPassphrase(fd.get('p1'));
     update((s) => { s.mentor = { id: uid('mentor'), name: fd.get('name').trim(), credential: fd.get('credential').trim(), shop: fd.get('shop').trim(), years: Number(fd.get('years')), passHash, registered: today() }; });
     mentorUnlockedUntil = Date.now() + MENTOR_SESSION_MS;
@@ -153,13 +155,13 @@ function bind(root) {
   $('#mentor-unlock')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const ok = await verifyPassphrase(new FormData(e.target).get('p'), st.mentor.passHash);
-    if (!ok) return alert('Incorrect passphrase.');
+    if (!ok) return notify('That passphrase is incorrect.');
     mentorUnlockedUntil = Date.now() + MENTOR_SESSION_MS;
     renderLedger(root);
   });
 
-  $('#mentor-reset')?.addEventListener('click', () => {
-    if (!confirm('Remove the registered mentor? Their sign-offs will no longer count.')) return;
+  $('#mentor-reset')?.addEventListener('click', async () => {
+    if (!(await confirmIt('Remove the registered mentor? Their sign-offs will no longer count.', 'Remove mentor', true))) return;
     update((s) => { s.formerMentors = [...(s.formerMentors || []), { ...s.mentor, passHash: undefined, removed: today() }]; s.mentor = null; });
     mentorUnlockedUntil = 0;
   });
@@ -167,7 +169,7 @@ function bind(root) {
   $('#mentor-lock')?.addEventListener('click', () => { mentorUnlockedUntil = 0; renderLedger(root); });
 
   const requireMentor = () => {
-    if (!mentorUnlocked()) { alert('Mentor Mode has locked. Unlock again.'); renderLedger(root); return false; }
+    if (!mentorUnlocked()) { renderLedger(root); notify('Mentor Mode has locked. Unlock it again to continue.'); return false; }
     mentorUnlockedUntil = Date.now() + MENTOR_SESSION_MS;
     return true;
   };
@@ -220,15 +222,12 @@ function bind(root) {
     update((s) => s.hours.push({ id: uid('hr'), date: fd.get('date'), hours: Number(fd.get('hours')), activity: fd.get('activity') }));
   });
 
-  $('#export').addEventListener('click', () => {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([exportJSON()], { type: 'application/json' }));
-    a.download = `lineage-backup-${today()}.json`;
-    a.click();
+  $('#export').addEventListener('click', async () => {
+    try { await saveText(`lineage-backup-${today()}.json`, exportJSON()); } catch (err) { notify(err.message); }
   });
   $('#import').addEventListener('change', async (e) => {
     const f = e.target.files[0];
     if (!f) return;
-    try { importJSON(await f.text()); } catch (err) { alert(err.message); }
+    try { importJSON(await f.text()); } catch (err) { notify(`That file could not be imported: ${err.message}`); }
   });
 }

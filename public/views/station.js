@@ -12,6 +12,7 @@ import { RESOURCES } from '../data/resources.js';
 import { getState, update, silentUpdate, uid, putFile } from '../lib/store.js';
 import { esc, tag, today, lessonHTML, bindQuizzes, evidenceLegend, thumbs, hydrateThumbs } from '../lib/ui.js';
 import { mountWidgets } from '../lib/widgets.js';
+import { notify, ask } from '../lib/dialog.js';
 import { clientWorkGate, exerciseUnlocked, healingDue, milestoneStatus, HEALING_CHECKPOINTS } from '../lib/logic.js';
 
 export const STATION_PAGES = [
@@ -403,7 +404,7 @@ const BIND = {
       e.preventDefault();
       const fd = new FormData(form);
       const files = fd.getAll('files').filter((f) => f.size);
-      if (!files.length) return alert('Add at least one photo or video.');
+      if (!files.length) return notify('Add at least one photo or video.');
       const fileIds = await saveFiles(files);
       update((s) => s.submissions.push({ id: uid('sub'), exerciseId: arg, date: today(), surface: fd.get('surface'), setup: fd.get('setup'), notes: fd.get('notes'), fileIds }));
     });
@@ -456,8 +457,8 @@ const BIND = {
       s.unitProgress = s.unitProgress || {};
       s.unitProgress[c.dataset.unit] = { ...(s.unitProgress[c.dataset.unit] || {}), [c.dataset.step]: c.checked ? today() : undefined };
     })));
-    root.querySelectorAll('[data-observe]').forEach((b) => b.addEventListener('click', () => {
-      const text = prompt('What did you observe? (artist, setting, what you learned)');
+    root.querySelectorAll('[data-observe]').forEach((b) => b.addEventListener('click', async () => {
+      const text = await ask('What did you observe? Note the artist, the setting and what you learned.');
       if (text) update((s) => s.mentorNotes.push({ id: uid('obs'), kind: 'observation', topic: b.dataset.observe, text, date: today(), source: 'apprentice' }));
     }));
   },
@@ -466,7 +467,7 @@ const BIND = {
     if (!form) return;
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!clientWorkGate(getState()).unlocked) return alert('Locked.');
+      if (!clientWorkGate(getState()).unlocked) return notify('The supervised session log is locked until your mentor signs every prerequisite.');
       const fd = new FormData(form);
       const fileIds = await saveFiles(fd.getAll('files').filter((f) => f.size));
       const rec = Object.fromEntries(['date', 'clientRef', 'supervisor', 'design', 'placement', 'setup', 'inks', 'duration', 'complications', 'reflection'].map((k) => [k, fd.get(k)]));
