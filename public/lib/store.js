@@ -24,7 +24,10 @@ const EMPTY = () => ({
   healingReviews: [],  // { id, sessionId, checkpoint, date, notes, fileIds, mentorNote }
   portfolio: [],       // { id, title, kind, fileIds, note, date }
   aiLog: [],           // AI Mentor reviews (source: 'ai'), never counted as sign-offs
-  workshop: {},        // taskKey -> date
+  workshop: {},        // exerciseId -> date
+  qstats: {},          // questionId -> { seen, right, lastOk }
+  bank: [],            // question-bank set history
+  unitProgress: {},    // topicId -> { session: date }
   seq: 0,
 });
 
@@ -50,6 +53,15 @@ export function update(fn) {
   state = draft;
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { console.warn('Could not persist state', e); }
   listeners.forEach((l) => l(state));
+}
+
+/** Persist without notifying listeners (avoids re-rendering away in-page results). */
+export function silentUpdate(fn) {
+  const draft = structuredClone(state);
+  fn(draft);
+  draft.seq = (draft.seq || 0) + 1;
+  state = draft;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { console.warn('Could not persist state', e); }
 }
 
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }

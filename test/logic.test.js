@@ -202,3 +202,48 @@ test('reviewUpload sends the guarded request and parses structured output', asyn
   assert.equal(r.recommended_training[0].exercise_id, 'ex.straight');
   assert.ok(r.cannot_determine.length >= 1);
 });
+
+test('deep content: keys match real lessons, diagrams exist, tags valid', async () => {
+  const { MACHINES_DEEP } = await import('../public/data/deep/machines.js');
+  const { NEEDLES_DEEP, SKIN_DEEP } = await import('../public/data/deep/needles-skin.js');
+  const { DIAGRAMS } = await import('../public/lib/diagrams.js');
+  const lessonIds = new Set([...MACHINE_LESSONS, ...NEEDLE_LESSONS, ...SKIN_LESSONS].map((l) => l.id));
+  const deep = { ...MACHINES_DEEP, ...NEEDLES_DEEP, ...SKIN_DEEP };
+  for (const [id, d] of Object.entries(deep)) {
+    assert.ok(lessonIds.has(id), `deep key ${id} has no lesson`);
+    if (d.diagram) assert.ok(DIAGRAMS[d.diagram], `missing diagram ${d.diagram}`);
+    for (const s of d.sections || []) assert.ok(['med', 'reg', 'ind', 'anec'].includes(s.tag), `${id} untagged`);
+  }
+  for (const id of lessonIds) assert.ok(deep[id], `lesson ${id} has no deep chapter`);
+  for (const k of Object.keys(DIAGRAMS)) assert.match(DIAGRAMS[k](), /<svg/);
+});
+
+test('every technique topic has a full unit with a drill progression', async () => {
+  const { UNITS } = await import('../public/data/deep/technique-units.js');
+  for (const t of TRACKS.flatMap((x) => x.topics)) {
+    const u = UNITS[t.id];
+    assert.ok(u, `no unit for ${t.id}`);
+    assert.ok(u.lessons.length >= 1 && u.progression.length >= 1, `${t.id} incomplete`);
+  }
+});
+
+test('question bank: 150+ well-formed questions across all domains, unique ids', async () => {
+  const { QUESTIONS, DOMAINS } = await import('../public/data/questions.js');
+  assert.ok(QUESTIONS.length >= 150, `only ${QUESTIONS.length}`);
+  assert.equal(new Set(QUESTIONS.map((q) => q.id)).size, QUESTIONS.length);
+  for (const q of QUESTIONS) {
+    assert.ok(DOMAINS[q.domain], q.id);
+    assert.ok(q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length, q.id);
+    assert.ok(q.explain, q.id);
+  }
+  for (const d of Object.keys(DOMAINS)) assert.ok(QUESTIONS.some((q) => q.domain === d), d);
+});
+
+test('workshop and archive have real content', async () => {
+  const { WORKSHOP } = await import('../public/data/workshop.js');
+  const { ARCHIVE } = await import('../public/data/archive.js');
+  assert.ok(WORKSHOP.length >= 8 && ARCHIVE.length >= 5);
+  const ids = WORKSHOP.flatMap((u) => u.exercises.map((e) => e.id));
+  assert.equal(new Set(ids).size, ids.length);
+  for (const u of WORKSHOP) assert.ok(u.lessons.length && u.critique.length);
+});

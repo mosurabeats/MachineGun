@@ -24,12 +24,12 @@ export const RESOURCES = [
     note: 'Several providers sell tattoo-specific BBP courses. Confirm with OPR which courses satisfy Vermont\'s universal-precautions requirement before buying.' },
 
   // Professional education
-  { id: 'tattooing101', kind: 'education', title: 'Tattooing 101', url: '', verified: false,
-    note: 'Long-running online tattoo-education brand with technique videos and courses. Evaluate against your mentor\'s guidance; some content is sales-oriented.' },
-  { id: 'fireside', kind: 'education', title: 'Fireside Tattoo Network', url: '', verified: false,
-    note: 'Network of artist-led videos and interviews, including technique and business content. Strong for hearing many professionals\' viewpoints.' },
+  { id: 'tattooing101', kind: 'education', title: 'Tattooing 101: Artist Accelerator Program and courses', url: 'https://elitetattoopro.teachable.com/', verified: true,
+    note: 'Paid, self-paced online courses: the Artist Accelerator (history, terminology, sanitation, lining, shading, color), a 30-day flash challenge and a realism course, plus a studio partnership program. Reviews describe a structured but marketing-heavy product. Use it as theory alongside, never instead of, your in-person apprenticeship. Check current prices.' },
+  { id: 'fireside', kind: 'education', title: 'Fireside Tattoo Network (Jake Meeks)', url: 'https://tattoonow.com/tattoo-news/inside-fireside-events~30988', verified: true,
+    note: 'Founded by Jake Meeks (nearly 30 years tattooing). Offers Fireside Foundations (design method, drawing for the body), the "Simplify" course, a membership club with live drawing and technique talks, and the long-running Fireside Tattoo Podcast. Strongest for design, drawing and hearing working artists\' views.' },
   { id: 'tattoosmart', kind: 'education', title: 'Tattoo Smart', url: '', verified: false,
-    note: 'Online tattoo-education platform. Check the instructor credentials and curriculum scope.' },
+    note: 'Could not be verified in research (Nov 2026): no reliable listing was found under this name. Before paying, confirm it exists, who teaches it and what it covers.' },
   { id: 'manufacturers', kind: 'equipment', title: 'Machine & needle manufacturers\' manuals and education pages', url: '', verified: false,
     note: 'The authoritative source for your exact machine\'s stroke, voltage range, cartridge compatibility, cleaning and maintenance. Always prefer these over generic charts.' },
   { id: 'builders', kind: 'equipment', title: 'Coil machine building & tuning resources', url: '', verified: false,

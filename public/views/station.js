@@ -6,8 +6,10 @@ import { PROCEDURE, CASE_STUDIES } from '../data/procedure.js';
 import { SUPERVISED_MODULES } from '../data/supervised.js';
 import { MILESTONES } from '../data/milestones.js';
 import { TRACKS } from '../data/techniques.js';
+import { UNITS } from '../data/deep/technique-units.js';
+import { QUESTIONS, DOMAINS } from '../data/questions.js';
 import { RESOURCES } from '../data/resources.js';
-import { getState, update, uid, putFile } from '../lib/store.js';
+import { getState, update, silentUpdate, uid, putFile } from '../lib/store.js';
 import { esc, tag, today, lessonHTML, bindQuizzes, evidenceLegend, thumbs, hydrateThumbs } from '../lib/ui.js';
 import { mountWidgets } from '../lib/widgets.js';
 import { clientWorkGate, exerciseUnlocked, healingDue, milestoneStatus, HEALING_CHECKPOINTS } from '../lib/logic.js';
@@ -26,21 +28,22 @@ export const STATION_PAGES = [
   { id: 'supervised', name: 'Supervised Client Work' },
   { id: 'healed', name: 'Healed Reviews' },
   { id: 'milestones', name: 'Practical Milestones' },
+  { id: 'questions', name: 'Question Bank' },
 ];
 
 const ALL_LESSONS = Object.fromEntries([...MACHINE_LESSONS, ...NEEDLE_LESSONS, ...SKIN_LESSONS].map((l) => [l.id, l]));
 const RES = Object.fromEntries(RESOURCES.map((r) => [r.id, r]));
 
-export function renderStation(root, sub = 'overview', arg) {
+export function renderStation(root, sub = 'overview', arg, arg2) {
   const page = STATION_PAGES.find((p) => p.id === sub) ? sub : 'overview';
   root.innerHTML = `
     <div class="station">
       <nav class="subnav">${STATION_PAGES.map((p) => `<a href="#/station/${p.id}" class="${p.id === page ? 'active' : ''}">${esc(p.name)}</a>`).join('')}</nav>
-      <div class="subpage">${PAGES[page](arg)}</div>
+      <div class="subpage">${PAGES[page](arg, arg2)}</div>
     </div>`;
   bindQuizzes(root, ALL_LESSONS);
   mountWidgets(root);
-  BIND[page]?.(root, arg);
+  BIND[page]?.(root, arg, arg2);
   hydrateThumbs(root);
 }
 
@@ -118,16 +121,17 @@ const PAGES = {
       ${refLinks(['osha-bbp', 'vt-rules', 'fda-ink', 'cdc-tattoo'])}`;
   },
 
-  techniques(arg) {
+  techniques(arg, topicId) {
     const st = getState();
     const track = TRACKS.find((t) => t.id === arg) || TRACKS[0];
+    if (topicId) return unitPage(track, topicId);
     const ex = Object.fromEntries(EXERCISES.map((e) => [e.id, e]));
     return `<h2>Technique Tracks</h2>
       <nav class="pills">${TRACKS.map((t) => `<a class="${t.id === track.id ? 'active' : ''}" href="#/station/techniques/${t.id}">${esc(t.title)}</a>`).join('')}</nav>
       <p class="small">Each topic has five parts: theory, demonstration study, a simulated exercise on synthetic skin, a professional observation assignment, and a supervised practical assessment signed by your mentor.</p>
       <p>Synthetic milestone: <b>${esc(msTitle(track.synthMilestone))}</b> (${statusBadge(st, track.synthMilestone)}) · Human-skin assessment: <b>${esc(msTitle(track.milestone))}</b> (${statusBadge(st, track.milestone)})</p>
       ${track.topics.map((t) => `
-        <details class="topic"><summary>${esc(t.title)}</summary>
+        <details class="topic"><summary>${esc(t.title)} <a class="small" href="#/station/techniques/${track.id}/${t.id}">open full unit →</a></summary>
           <dl>
             <dt>Theory</dt><dd>${esc(t.theory)}</dd>
             <dt>Demonstration study</dt><dd>${esc(t.demo)}</dd>
@@ -236,6 +240,24 @@ const PAGES = {
       <p class="warn small">Concerning signs (spreading redness, heat, pus, red streaks, fever, raised or itchy reactions confined to one color) are referred to a health-care professional. Do not wait for a scheduled review.</p>`;
   },
 
+  questions(domain) {
+    const st = getState();
+    const pool = QUESTIONS.filter((q) => !domain || domain === 'all' || q.domain === domain);
+    const hist = (st.bank || []).slice(-8).reverse();
+    return `<h2>Question Bank</h2>
+      <p class="lede">${QUESTIONS.length} questions across ${Object.keys(DOMAINS).length} domains, including scenario judgement questions. Each set draws 10 at random and favours questions you have missed.</p>
+      <nav class="pills"><a class="${!domain || domain === 'all' ? 'active' : ''}" href="#/station/questions/all">All (${QUESTIONS.length})</a>${Object.entries(DOMAINS).map(([k, v]) => `<a class="${domain === k ? 'active' : ''}" href="#/station/questions/${k}">${esc(v)} (${QUESTIONS.filter((q) => q.domain === k).length})</a>`).join('')}</nav>
+      <button id="bank-start">Start a 10-question set${domain && domain !== 'all' ? `: ${esc(DOMAINS[domain])}` : ''}</button>
+      <div id="bank-area" data-pool="${esc(pool.map((q) => q.id).join(','))}"></div>
+      ${hist.length ? `<h3>Recent sets</h3><table class="tbl"><tbody>${hist.map((h) => `<tr><td>${esc(h.date)}</td><td>${esc(h.domain === 'all' ? 'All' : DOMAINS[h.domain] || h.domain)}</td><td>${h.correct}/${h.total}</td></tr>`).join('')}</tbody></table>` : ''}
+      <h3>Mastery by domain</h3><table class="tbl"><tbody>${Object.entries(DOMAINS).map(([k, v]) => {
+        const qs = QUESTIONS.filter((q) => q.domain === k);
+        const right = qs.filter((q) => (st.qstats || {})[q.id]?.lastOk).length;
+        return `<tr><td>${esc(v)}</td><td><progress max="${qs.length}" value="${right}"></progress> ${right}/${qs.length} last answered correctly</td></tr>`;
+      }).join('')}</tbody></table>
+      <p class="muted small">Knowledge checks measure understanding, not practical skill or readiness to tattoo.</p>`;
+  },
+
   milestones() {
     const st = getState();
     const phases = [['pre-client', 'Before client work'], ['supervised', 'Supervised client work'], ['independence', 'Toward independent practice']];
@@ -254,6 +276,27 @@ function videoStudy(kind) {
     : ['Watch a full procedure video from a licensed artist. Mark every glove change and barrier touch.', 'Identify one cross-contamination risk in a video and describe the fix.'];
   return `<div class="item"><h4>Video & demonstration study</h4><p class="small">LINEAGE does not host third-party videos. Use the <a href="#/archive/research">research library</a> to find professional sources, then complete these observation prompts:</p>
     <ul>${prompts.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>`;
+}
+
+function unitPage(track, topicId) {
+  const t = track.topics.find((x) => x.id === topicId);
+  if (!t) return '<p>Unknown topic.</p>';
+  const u = UNITS[topicId] || {};
+  const ex = EXERCISES.find((e) => e.id === t.exercise);
+  const done = getState().unitProgress?.[topicId] || {};
+  return `<p><a href="#/station/techniques/${track.id}">← ${esc(track.title)}</a></p>
+    <h2>${esc(t.title)}</h2>
+    <p class="lede">${esc(t.theory)}</p>
+    <section class="panel"><h3>1. Theory</h3>${(u.lessons || []).map((p) => `<p>${esc(p)}</p>`).join('')}</section>
+    <section class="panel"><h3>2. Demonstration study</h3><p>${esc(t.demo)}</p><p class="small muted">Find professional demonstrations through the <a href="#/archive/research">research library</a>, and record what you watched with the <b>Log observation</b> button in section 4.</p></section>
+    <section class="panel"><h3>3. Drill progression (synthetic skin)</h3>
+      ${u.progression?.length ? `<table class="tbl"><thead><tr><th>Session</th><th>Drill</th><th>Target</th><th>Done</th></tr></thead><tbody>${u.progression.map((p) => `<tr><td>${p.s}</td><td>${esc(p.drill)}</td><td>${esc(p.target)}</td><td><input type="checkbox" data-unit="${esc(topicId)}" data-step="${p.s}" ${done[p.s] ? 'checked' : ''}></td></tr>`).join('')}</tbody></table>` : ''}
+      ${ex ? `<p>Linked assignment: <a href="#/station/practice/${esc(ex.id)}">${esc(ex.title)}</a>. Submit photos there for AI feedback.</p>` : ''}
+      ${u.goodEnough?.length ? `<h4>Good enough to move on (visible criteria on synthetic skin)</h4><ul>${u.goodEnough.map((g) => `<li>${esc(g)}</li>`).join('')}</ul><p class="muted small">Meeting these on synthetic skin is not competency on human skin.</p>` : ''}
+    </section>
+    ${u.defects?.length ? `<section class="panel"><h3>Defect guide</h3><table class="tbl"><thead><tr><th>Defect</th><th>Looks like</th><th>Likely cause</th><th>Fix</th></tr></thead><tbody>${u.defects.map((d) => `<tr><td><b>${esc(d.d)}</b></td><td>${esc(d.looks)}</td><td>${esc(d.cause)}</td><td>${esc(d.fix)}</td></tr>`).join('')}</tbody></table></section>` : ''}
+    <section class="panel"><h3>4. Professional observation</h3><p>${esc(t.observe)}</p><button class="link" data-observe="${esc(t.id)}">Log observation</button></section>
+    <section class="panel"><h3>5. Supervised practical assessment</h3><p>Signed by your mentor in person: <b>${esc(msTitle(track.synthMilestone))}</b> (${statusBadge(getState(), track.synthMilestone)}). On human skin: <b>${esc(msTitle(track.milestone))}</b> (${statusBadge(getState(), track.milestone)}).</p></section>`;
 }
 
 function msTitle(id) { return MILESTONES.find((m) => m.id === id)?.title || id; }
@@ -379,7 +422,40 @@ const BIND = {
       });
     });
   },
+  questions(root, domain) {
+    root.querySelector('#bank-start').addEventListener('click', () => {
+      const area = root.querySelector('#bank-area');
+      const ids = area.dataset.pool.split(',');
+      const stats = getState().qstats || {};
+      // weight missed / unseen questions higher
+      const weighted = ids.map((id) => ({ id, w: Math.random() * (stats[id]?.lastOk ? 1 : 3) })).sort((a, b) => b.w - a.w).slice(0, 10);
+      const set = weighted.map(({ id }) => QUESTIONS.find((q) => q.id === id));
+      area.innerHTML = `<form class="quiz form" id="bank-form">${set.map((q, i) => `<fieldset><legend>${i + 1}. ${esc(q.q)} <span class="muted small">(${esc(DOMAINS[q.domain])})</span></legend>${q.options.map((o, j) => `<label><input type="radio" name="q${i}" value="${j}" required> ${esc(o)}</label>`).join('')}<div class="explain" hidden></div></fieldset>`).join('')}<button>Submit</button> <span class="quiz-result"></span></form>`;
+      area.querySelector('#bank-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        let correct = 0;
+        const results = set.map((q, i) => { const ok = Number(fd.get(`q${i}`)) === q.answer; if (ok) correct++; return { q, ok }; });
+        e.target.querySelectorAll('fieldset').forEach((fs, i) => {
+          const ex = fs.querySelector('.explain'); const { q, ok } = results[i];
+          ex.hidden = false; ex.className = `explain ${ok ? 'ok' : 'bad'}`;
+          ex.textContent = `${ok ? 'Correct.' : `Answer: ${q.options[q.answer]}.`} ${q.explain}`;
+        });
+        e.target.querySelector('button').disabled = true;
+        e.target.querySelector('.quiz-result').textContent = `${correct}/${set.length}`;
+        // persist without re-rendering away the answers
+        const st = getState();
+        const qstats = { ...(st.qstats || {}) };
+        results.forEach(({ q, ok }) => { const p = qstats[q.id] || { seen: 0, right: 0 }; qstats[q.id] = { seen: p.seen + 1, right: p.right + (ok ? 1 : 0), lastOk: ok }; });
+        silentUpdate((s) => { s.qstats = qstats; s.bank = [...(s.bank || []), { date: today(), domain: domain || 'all', correct, total: set.length }]; });
+      });
+    });
+  },
   techniques(root) {
+    root.querySelectorAll('[data-unit]').forEach((c) => c.addEventListener('change', () => update((s) => {
+      s.unitProgress = s.unitProgress || {};
+      s.unitProgress[c.dataset.unit] = { ...(s.unitProgress[c.dataset.unit] || {}), [c.dataset.step]: c.checked ? today() : undefined };
+    })));
     root.querySelectorAll('[data-observe]').forEach((b) => b.addEventListener('click', () => {
       const text = prompt('What did you observe? (artist, setting, what you learned)');
       if (text) update((s) => s.mentorNotes.push({ id: uid('obs'), kind: 'observation', topic: b.dataset.observe, text, date: today(), source: 'apprentice' }));

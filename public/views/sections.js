@@ -1,4 +1,6 @@
-import { SUCCESS_CRITERIA, WORKSHOP_UNITS, ARCHIVE_UNITS } from '../data/curriculum.js';
+import { SUCCESS_CRITERIA } from '../data/curriculum.js';
+import { WORKSHOP } from '../data/workshop.js';
+import { ARCHIVE } from '../data/archive.js';
 import { RESOURCES, DISAGREEMENTS } from '../data/resources.js';
 import { getState, update, uid, putFile } from '../lib/store.js';
 import { esc, tag, today, thumbs, hydrateThumbs, evidenceLegend } from '../lib/ui.js';
@@ -24,8 +26,15 @@ export function renderPath(root) {
       const qs = Object.entries(st.quiz).filter(([id]) => prefixes.some((p) => id.startsWith(p)));
       return qs.length ? `${qs.length} knowledge check(s) taken` : 'not started';
     }
-    if (c.evidence.includes('workshop')) return `${Object.keys(st.workshop).length} workshop tasks done`;
-    if (c.evidence.includes('archive')) return 'self-study';
+    if (c.evidence.includes('workshop')) {
+      const total = WORKSHOP.reduce((a, u) => a + u.exercises.length, 0);
+      return `${WORKSHOP.flatMap((u) => u.exercises).filter((e) => st.workshop[e.id]).length}/${total} workshop exercises done`;
+    }
+    if (c.evidence.includes('archive')) {
+      const read = ARCHIVE.filter((a) => st.lessonsRead?.[a.id]).length;
+      const hist = Object.entries(st.qstats || {}).filter(([id, v]) => id.startsWith('history.') && v.lastOk).length;
+      return `${read}/${ARCHIVE.length} chapters read · ${hist} history questions correct`;
+    }
     return '';
   };
   const next = nextSteps(st, gate);
@@ -76,21 +85,35 @@ function nextSteps(st, gate) {
 }
 
 // ------------------------------------------------------------------ Workshop
-export function renderWorkshop(root) {
+export function renderWorkshop(root, unitId) {
   const st = getState();
+  const unit = WORKSHOP.find((u) => u.id === unitId);
+  const count = (u) => u.exercises.filter((e) => st.workshop[e.id]).length;
   root.innerHTML = `
     <h2>The Workshop</h2>
-    <p class="lede">Drawing, design and traditional tattoo art: the 30% foundation that continues throughout your apprenticeship.</p>
-    ${WORKSHOP_UNITS.map((u) => `<section class="panel"><h3>${esc(u.title)}</h3>
-      ${u.tasks.map((t, i) => { const key = `${u.id}.${i}`; return `<label><input type="checkbox" data-task="${key}" ${st.workshop[key] ? 'checked' : ''}> ${esc(t)} ${st.workshop[key] ? `<span class="muted small">(${esc(st.workshop[key])})</span>` : ''}</label>`; }).join('')}
-    </section>`).join('')}
-    <p>Upload designs to <a href="#/portfolio">The Portfolio</a> and ask <a href="#/mentor?type=design">The Mentor</a> for critique. Technique-specific design work (translating flash, line weight, sizing) is in <a href="#/station/techniques/trk.trad">Traditional Tattoo Application</a>.</p>`;
+    <p class="lede">Drawing, design and traditional tattoo art: 30% of the starting curriculum, and practice that continues for your whole career.</p>
+    <div class="station">
+      <nav class="subnav">${WORKSHOP.map((u) => `<a href="#/workshop/${u.id}" class="${u.id === unit?.id ? 'active' : ''}">${esc(u.title)} <span class="muted small">${count(u)}/${u.exercises.length}</span></a>`).join('')}</nav>
+      <div class="subpage">${unit ? `
+        <h3>${esc(unit.title)}</h3>
+        ${unit.lessons.map((p) => `<p>${esc(p)}</p>`).join('')}
+        <section class="panel"><h4>Exercises</h4>
+          ${unit.exercises.map((e) => `<label><input type="checkbox" data-task="${e.id}" ${st.workshop[e.id] ? 'checked' : ''}> ${esc(e.t)} ${st.workshop[e.id] ? `<span class="muted small">(${esc(st.workshop[e.id])})</span>` : ''}</label>`).join('')}
+        </section>
+        <section class="panel"><h4>Critique criteria</h4><ul>${unit.critique.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
+          <p class="small">Upload your work to <a href="#/portfolio">The Portfolio</a> and ask <a href="#/mentor?type=design">The Mentor</a> to critique it against these criteria. Bring physical work to your mentor too.</p></section>`
+        : `<p>Choose a unit. Work through them in order, but keep daily line practice (unit 1) going throughout.</p>
+           <div class="grid2">${WORKSHOP.map((u) => `<a class="tile" href="#/workshop/${u.id}"><h4>${esc(u.title)}</h4><p class="small muted">${count(u)}/${u.exercises.length} exercises</p></a>`).join('')}</div>`}
+      </div>
+    </div>`;
   root.querySelectorAll('[data-task]').forEach((c) => c.addEventListener('change', () => update((s) => { if (c.checked) s.workshop[c.dataset.task] = today(); else delete s.workshop[c.dataset.task]; })));
 }
 
 // ------------------------------------------------------------------ Archive
 export function renderArchive(root, sub) {
+  const st = getState();
   const kinds = [['regulation', 'Regulation'], ['safety', 'Public health & safety'], ['education', 'Professional education'], ['equipment', 'Equipment & manufacturers'], ['community', 'Community']];
+  const ch = ARCHIVE.find((a) => a.id === sub);
   root.innerHTML = `
     <h2>The Archive</h2>
     <nav class="pills"><a href="#/archive" class="${sub !== 'research' ? 'active' : ''}">History & theory</a><a href="#/archive/research" class="${sub === 'research' ? 'active' : ''}">Research library</a></nav>
@@ -99,9 +122,17 @@ export function renderArchive(root, sub) {
       ${kinds.map(([k, label]) => `<h3>${esc(label)}</h3><ul class="res">${RESOURCES.filter((r) => r.kind === k).map((r) => `<li>${r.verified ? '✓ ' : ''}${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : `<b>${esc(r.title)}</b>`}<br><span class="small">${esc(r.note)}</span></li>`).join('')}</ul>`).join('')}
       <h3>Where educators disagree</h3>${evidenceLegend()}
       ${DISAGREEMENTS.map((d) => `<details class="topic"><summary>${esc(d.topic)} ${tag(d.evidence)}</summary><ul>${d.positions.map((p) => `<li>${esc(p)}</li>`).join('')}</ul><p><b>LINEAGE's approach:</b> ${esc(d.lineage)}</p></details>`).join('')}
+    ` : ch ? `
+      <p><a href="#/archive">← All chapters</a></p>
+      <h3>${esc(ch.title)}</h3>
+      ${ch.sections.map((x) => `<section><h4>${esc(x.h)}</h4>${x.p.map((p) => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
+      <label><input type="checkbox" id="ch-read" ${st.lessonsRead?.[ch.id] ? 'checked' : ''}> Mark chapter as read</label>
+      <p class="small">Test yourself in the <a href="#/station/questions/history">history question bank</a>.</p>
     ` : `
-      <p class="lede">Tattoo history and technical theory: the 15% that explains why traditional work looks the way it does.</p>
-      ${ARCHIVE_UNITS.map((u) => `<section class="panel"><h3>${esc(u.title)}</h3><ul>${u.topics.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></section>`).join('')}`}`;
+      <p class="lede">Tattoo history and technical theory: the 15% that explains why traditional work looks the way it does. Approach other cultures' traditions with respect. Many carry lineage or sacred meaning and are not styles to copy.</p>
+      <div class="grid2">${ARCHIVE.map((a) => `<a class="tile" href="#/archive/${a.id}"><h4>${st.lessonsRead?.[a.id] ? '✓ ' : ''}${esc(a.title)}</h4></a>`).join('')}</div>
+      <p class="small">Technical theory (machine electromagnetism, rotary mechanics, pigment biology) is taught in depth in <a href="#/station/machines">The Station</a>.</p>`}`;
+  root.querySelector('#ch-read')?.addEventListener('change', (e) => update((s) => { s.lessonsRead = s.lessonsRead || {}; if (e.target.checked) s.lessonsRead[ch.id] = today(); else delete s.lessonsRead[ch.id]; }));
 }
 
 // ------------------------------------------------------------------ Portfolio

@@ -19,9 +19,9 @@ Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. 
 | Section | Purpose |
 |---|---|
 | **The Path** | Curriculum balance (default 30/25/20/15/10, adjustable, and marked when the mentor set it), weekly hour plan, next steps, the 10 success criteria |
-| **The Workshop** | Drawing, design and traditional tattoo art |
+| **The Workshop** | 9 drawing and design units (line, silhouette, form and value, traditional motifs, color, lettering, designing to be tattooed, flash sheets, stencils), each with lessons, tracked exercises and critique criteria |
 | **The Station** | The practical tattooing education center (below) |
-| **The Archive** | Tattoo history, technical theory, research library, and where professional educators disagree |
+| **The Archive** | 6 history and composition chapters (ancient and world traditions, Japanese, Western and the electric machine, American traditional, modern regulation, composition on the body), the research library, and where educators disagree |
 | **The Mentor** | AI technical mentor: feedback on visible results, never certification |
 | **The Ledger** | Mentor Mode, legal status, apprenticeship hours, milestones, knowledge checks, backup |
 | **The Portfolio** | Designs, practice pieces, fresh and healed supervised work |
@@ -32,7 +32,9 @@ Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. 
 * **Needle Library**: RL, RS, F, M1 and CM configurations, gauges, tapers, cartridges vs bars, selection, and an interactive to-scale comparison.
 * **Skin Anatomy**: layers (interactive diagram), elasticity, healing phases, blowouts, overworking, scarring, retention, and stop/refer criteria.
 * **Equipment**, **Safety Training** (BBP, cross-contamination, ink safety, exposure incidents, emergencies) and **Troubleshooting** (symptom → causes → checks, with stop items).
-* **Technique Tracks**: Lining, Black and Gray, Color, Traditional Application. Each topic has theory, demonstration study, a simulated exercise, a professional observation assignment, and a supervised assessment.
+* **Technique Tracks**: Lining, Black and Gray, Color, Traditional Application. 28 full units, each with theory, demonstration study, a session-by-session drill progression with check-offs, "good enough to move on" criteria for synthetic skin, a defect guide (what it looks like, cause, fix), an observation assignment and a mentor-signed assessment.
+* **Chapter-depth lessons**: every machine, needle and skin lesson has extended sections, worked examples, a common-mistakes table and drills. Eight labelled diagrams: coil anatomy, rotary mechanism, needle geometry, skin thickness by body site, three-point stretch, machine angle, clean vs contaminated field, and healing phases.
+* **Question Bank**: 166 questions across 10 domains (machines, needles, skin, safety, procedure, Vermont law, technique, design, history, scenarios). Sets of 10 draw missed questions more often, and mastery is tracked per domain.
 * **Synthetic-Skin Assignments**: 15 progressive exercises in 4 levels. Each needs photo or video evidence and states visible criteria. Assignments unlock as you submit work, which tracks progress only and says nothing about competency.
 * **Procedure Checklists**: all 18 steps of an appointment, with safety-critical steps marked and referenced, practice runs, and case studies.
 * **Supervised Client Work**: 12 modules covering readiness, Vermont law, eligibility and consent, mentor supervision, beginner projects, facility standards, comfort, complications, documentation, healing, feedback and assessment. Also the **supervised session log**, which stays locked until the gate below is met.
@@ -52,7 +54,7 @@ Without `ANTHROPIC_API_KEY`, everything works except AI feedback in The Mentor. 
 
 ## What it does not do yet
 
-* No hosted video library. Demonstration study points to professional sources through observation prompts.
+* No hosted video library. Demonstration study points to professional sources through observation prompts. There are no photos of real defects: the defect guides describe them in words.
 * No multi-device sync or remote mentor login. The mentor signs on the apprentice's device.
 * Exported backups do not include photos or videos.
 * The AI Mentor was tested against a mocked API, not a live key.

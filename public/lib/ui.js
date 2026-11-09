@@ -1,6 +1,11 @@
 import { EVIDENCE } from '../data/evidence.js';
 import { getState, update, fileURL } from './store.js';
 import { scoreQuiz } from './logic.js';
+import { diagram } from './diagrams.js';
+import { MACHINES_DEEP } from '../data/deep/machines.js';
+import { NEEDLES_DEEP, SKIN_DEEP } from '../data/deep/needles-skin.js';
+
+export const DEEP = { ...MACHINES_DEEP, ...NEEDLES_DEEP, ...SKIN_DEEP };
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -26,11 +31,23 @@ export function lessonHTML(lesson) {
     <header><h3>${esc(lesson.title)}</h3><p class="lede">${esc(lesson.summary)}</p></header>
     ${(lesson.sections || []).map((s) => `
       <section><h4>${esc(s.h)} ${tag(s.tag)}</h4>${s.p.map((p) => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
+    ${deepHTML(lesson)}
     ${lesson.interactive ? `<div class="widget" data-widget="${esc(lesson.interactive)}"></div>` : ''}
     ${lesson.keyPoints?.length ? `<div class="keypoints"><strong>Key points</strong><ul>${lesson.keyPoints.map((k) => `<li>${esc(k)}</li>`).join('')}</ul></div>` : ''}
     ${lesson.quiz?.length ? quizHTML(lesson) : ''}
     ${q ? `<p class="muted small">Last knowledge check: ${q.pct}% on ${esc(q.date)}</p>` : ''}
   </article>`;
+}
+
+function deepHTML(lesson) {
+  const d = DEEP[lesson.id];
+  if (!d) return '';
+  return `
+    ${d.diagram ? diagram(d.diagram) : ''}
+    ${(d.sections || []).map((s) => `<section><h4>${esc(s.h)} ${tag(s.tag)}</h4>${s.p.map((p) => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
+    ${(d.examples || []).map((e) => `<div class="example"><strong>${esc(e.t)}</strong><p>${esc(e.p)}</p></div>`).join('')}
+    ${d.mistakes?.length ? `<h4>Common mistakes</h4><table class="tbl"><thead><tr><th>Mistake</th><th>Why it matters</th><th>Fix</th></tr></thead><tbody>${d.mistakes.map((m) => `<tr><td>${esc(m.m)}</td><td>${esc(m.why)}</td><td>${esc(m.fix)}</td></tr>`).join('')}</tbody></table>` : ''}
+    ${d.drills?.length ? `<div class="drills"><strong>Drills</strong><ol>${d.drills.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}`;
 }
 
 function quizHTML(lesson) {

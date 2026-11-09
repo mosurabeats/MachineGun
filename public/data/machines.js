@@ -7,7 +7,6 @@ export const MACHINE_LESSONS = [
     id: 'mach.coil',
     title: 'Traditional coil machines',
     summary: 'Electromagnetic machines whose armature bar is pulled down by two coils and returned by springs, breaking and remaking the circuit every cycle.',
-    diagram: 'coil',
     sections: [
       { h: 'How the circuit works', tag: 'med', p: [
         'Current flows through the front spring and contact screw into the coils. The energised coils become an electromagnet and pull the armature bar down, which drives the needle out of the tube. When the armature drops, the front spring separates from the contact screw, the circuit opens, the magnetic field collapses and the springs return the bar. Contact is remade and the cycle repeats, many times per second.',
@@ -34,7 +33,6 @@ export const MACHINE_LESSONS = [
     id: 'mach.rotary',
     title: 'Rotary, direct-drive and cam-driven systems',
     summary: 'Electric-motor machines that turn rotation into reciprocating needle motion through a cam, an eccentric bearing or a linkage.',
-    diagram: 'stroke',
     sections: [
       { h: 'Converting rotation to stroke', tag: 'med', p: [
         'A DC motor spins an eccentric cam or offset bearing. The offset converts rotation into up-and-down motion. The offset distance sets the stroke length: how far the needle travels per revolution.',
@@ -75,7 +73,6 @@ export const MACHINE_LESSONS = [
     id: 'mach.stroke-give',
     title: 'Stroke length, give and machine response',
     summary: 'How far the needle travels, how much it yields under resistance, and what you see and feel as a result.',
-    diagram: 'stroke',
     interactive: 'stroke-sim',
     sections: [
       { h: 'Stroke', tag: 'ind', p: [

@@ -107,3 +107,17 @@ button.link { background: none; color: var(--red); padding: 0; text-decoration: 
 .nc-side select { width: auto; margin: .2rem .2rem .2rem 0; }
 .needle-svg { width: 100%; max-width: 220px; aspect-ratio: 1; background: var(--bg); border-radius: 50%; display: block; margin: .5rem auto; }
 .pin { fill: #8a8a8a; stroke: #444; stroke-width: .3; }
+
+.diagram { margin: 1rem 0; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: .6rem; }
+.diagram svg { width: 100%; max-width: 560px; display: block; margin: 0 auto; }
+.diagram figcaption { font-size: .85rem; color: var(--muted); text-align: center; }
+.dg-t { font: 11px 'Helvetica Neue', Arial, sans-serif; fill: var(--ink); }
+.dg-l { stroke: var(--muted); stroke-width: 1; fill: none; }
+.dg-metal { fill: #9a9a9a; stroke: #555; } .dg-coil { fill: #b5831e; stroke: #6c4d0b; } .dg-arm { fill: #666; }
+.dg-spring { stroke: #444; stroke-width: 3; fill: none; } .dg-contact { fill: #b0261c; }
+.dg-needle { stroke: #c9c9c9; stroke-width: 3; } .dg-tube { fill: #777; opacity: .8; }
+.dg-arrow { stroke: var(--red); stroke-width: 2; fill: none; } .dg-ah { fill: var(--red); }
+.dg-skin { fill: var(--epi); } .dg-clean { fill: #d6ecdc; stroke: var(--green); } .dg-dirty { fill: #f5d3cf; stroke: var(--red); }
+.dg-bar { fill: var(--derm); } .dg-bar1 { opacity: .45; } .dg-bar2 { opacity: .6; } .dg-bar3 { opacity: .75; } .dg-bar4 { opacity: .88; } .dg-bar5 { opacity: 1; }
+.example { background: var(--bg); border-left: 4px solid var(--gold); padding: .6rem .9rem; margin: .8rem 0; border-radius: 4px; }
+.drills { border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .5rem; }
